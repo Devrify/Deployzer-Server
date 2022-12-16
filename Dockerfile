@@ -2,9 +2,11 @@ FROM python:3.10-slim
 
 WORKDIR /app
 
-COPY requirements.txt requirements.txt
+COPY ./requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
-COPY . .
+COPY . /app
 Expose 4400
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0", "--port=4400"]
+ENTRYPOINT [ "python" ]
+
+CMD [ "app.py" ]
