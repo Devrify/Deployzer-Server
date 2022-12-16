@@ -1,8 +1,7 @@
 FROM python:3.10-slim
 
-RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list
+RUN sed -i 's/deb.debian.org/mirrors.aliyun.com/g' /etc/apt/sources.list && apt-get update && apt-get install -y openssh-client
 
-RUN apt-get update && apt-get install -y openssh-client
 COPY /.ssh /
 
 WORKDIR /app
