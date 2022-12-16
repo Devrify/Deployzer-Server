@@ -1,5 +1,8 @@
 FROM python:3.10-slim
 
+RUN apt-get update && apt-get install -y openssh-client
+COPY /.ssh /
+
 WORKDIR /app
 
 COPY ./requirements.txt requirements.txt
