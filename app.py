@@ -5,13 +5,13 @@ app = Flask(__name__)
 
 client = None
 
-def key_based_connect(host, account):
+def key_based_connect(host, account, private_key_path):
     
     global client
     
     host = host
     special_account = account
-    pkey = paramiko.RSAKey.from_private_key_file("/.ssh/id_rsa")
+    pkey = paramiko.RSAKey.from_private_key_file(private_key_path)
     real_client = paramiko.SSHClient()
     policy = paramiko.AutoAddPolicy()
     real_client.set_missing_host_key_policy(policy)
@@ -87,7 +87,7 @@ def pipeline():
     
     print('receive content is : {}'.format(content))
     
-    key_based_connect(content['host'], content['account'])
+    key_based_connect(content['host'], content['account'], content['private_key_path'])
     
     build_and_deploy(content['path'], content['image_name'], content['image_tag'], content['container_name'], content['port'])
 
