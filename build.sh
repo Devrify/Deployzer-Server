@@ -4,7 +4,7 @@ container_name=pipeline
 
 kill_container()
 {
-    docker rm -f -v ${name}
+    docker rm -f -v ${container_name}
 }
 
 cd /root/pythonProject/lightweight-pipeline
