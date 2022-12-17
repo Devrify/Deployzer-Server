@@ -1,3 +1,5 @@
+import os
+
 import paramiko
 from flask import Flask, request
 
@@ -5,15 +7,21 @@ app = Flask(__name__)
 
 client = None
 
-def key_based_connect(host, account, known_host_file, private_key_path):
+def key_based_connect(host, account, ssh_path, key_type):
     
     global client
+    
+    pkey = None
 
     real_client = paramiko.SSHClient()
-    real_client.load_host_keys(known_host_file)
-    pkey = paramiko.Ed25519Key.from_private_key_file(private_key_path)
-    policy = paramiko.AutoAddPolicy()
-    real_client.set_missing_host_key_policy(policy)
+    real_client.load_host_keys(os.path.join(ssh_path, 'known_hosts'))
+    real_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    
+    if key_type == 'rsa':
+        pkey = paramiko.RSAKey.from_private_key_file(os.path.join(ssh_path, 'id_rsa'))
+    elif key_type == 'ed25519':
+        pkey = paramiko.Ed25519Key.from_private_key_file(os.path.join(ssh_path, 'id_ed25519'))
+
     real_client.connect(host, username=account, pkey=pkey)
     client = real_client
 
