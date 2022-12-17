@@ -13,4 +13,4 @@ cd /root/pythonProject/lightweight-pipeline
 git pull
 kill_container || true
 docker build -t ${image_name} .
-docker run -d -p 4400:4400 --restart always --name ${container_name} -v ~/.ssh:/root/.ssh:ro ${image_name}
+docker run -d -p 4400:4400 --restart always --name ${container_name} -v ~/.ssh:/root/.ssh ${image_name}
