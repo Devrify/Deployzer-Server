@@ -5,17 +5,16 @@ app = Flask(__name__)
 
 client = None
 
-def key_based_connect(host, account, private_key_path):
+def key_based_connect(host, account, known_host_file, private_key_path):
     
     global client
-    
-    host = host
-    special_account = account
-    pkey = paramiko.Ed25519Key.from_private_key_file(private_key_path)
+
     real_client = paramiko.SSHClient()
+    real_client.load_host_keys(known_host_file)
+    pkey = paramiko.Ed25519Key.from_private_key_file(private_key_path)
     policy = paramiko.AutoAddPolicy()
     real_client.set_missing_host_key_policy(policy)
-    real_client.connect(host, username=special_account, pkey=pkey)
+    real_client.connect(host, username=account, pkey=pkey)
     client = real_client
 
 def perform_log(command, variable_name:list, variable:list):
