@@ -1,7 +1,7 @@
 #!/bin/bash
 image_name=python/pipeline
 container_name=pipeline
-ssh_path_in_container=/home/.ssh
+ssh_path_in_container=/root/.ssh
 ssh_path_in_host=~/.ssh
 
 kill_container()
