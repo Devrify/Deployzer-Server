@@ -94,7 +94,7 @@ def pipeline():
     
     print('receive content is : {}'.format(content))
     
-    key_based_connect(content['host'], content['account'], content['private_key_path'])
+    key_based_connect(content['host'], content['account'], content['ssh_path'], content['key_type'])
     
     build_and_deploy(content['path'], content['image_name'], content['image_tag'], content['container_name'], content['port'])
 
