@@ -11,7 +11,7 @@ def key_based_connect(host, account, private_key_path):
     
     host = host
     special_account = account
-    pkey = paramiko.RSAKey.from_private_key_file(private_key_path)
+    pkey = paramiko.Ed25519Key.from_private_key_file(private_key_path)
     real_client = paramiko.SSHClient()
     policy = paramiko.AutoAddPolicy()
     real_client.set_missing_host_key_policy(policy)
