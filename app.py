@@ -83,8 +83,6 @@ def build_and_deploy(path, image_name, image_tag, container_name, port):
 @app.route('/start', methods=['POST'])
 def pipeline():
     
-    global client
-    
     content = request.get_json(silent=False)
     
     print('receive content is : {}'.format(content))

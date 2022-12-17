@@ -2,7 +2,7 @@ FROM python:3.10-slim
 
 RUN sed -i 's/deb.debian.org/mirrors.cloud.tencent.com/g' /etc/apt/sources.list && apt-get update && apt-get install -y openssh-client
 
-COPY /root/.ssh /
+COPY /.ssh /.ssh
 
 WORKDIR /app
 
