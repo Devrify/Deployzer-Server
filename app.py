@@ -91,7 +91,7 @@ def pipeline():
     
     build_and_deploy(content['path'], content['image_name'], content['image_tag'], content['container_name'], content['port'])
 
-
+    return "Start building"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4400)
