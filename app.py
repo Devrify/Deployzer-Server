@@ -15,7 +15,7 @@ def key_based_connect(host, account, ssh_path, key_type):
 
     real_client = paramiko.SSHClient()
     real_client.load_host_keys(os.path.join(ssh_path, 'known_hosts'))
-    real_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    real_client.set_missing_host_key_policy(paramiko.WarningPolicy())
     
     if key_type == 'rsa':
         pkey = paramiko.RSAKey.from_private_key_file(os.path.join(ssh_path, 'id_rsa'))
