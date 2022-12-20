@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 
 
-def build_and_deploy(client:SSH_Client, image_name, image_tag, container_name, port):
+def build_and_deploy(client:SSH_Client, image_name, container_name, port):
     
     client.excute_command(cmd.update_git())
     client.excute_command(cmd.maven_build())
@@ -46,7 +46,7 @@ def pipeline():
     
     logger.info('receive content is : {}'.format(content))
     
-    build_and_deploy(client, content['image_name'], content['image_tag'], content['container_name'], content['port'])
+    build_and_deploy(client, content['image_name'], content['container_name'], content['port'])
 
     return "Finsh building"
 
