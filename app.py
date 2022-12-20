@@ -1,5 +1,5 @@
 from flask import Flask, request
-import logging
+import logging.config
 from ssh_client import SSH_Client
 from pipeline_command import Pipeline_Command as cmd
 
