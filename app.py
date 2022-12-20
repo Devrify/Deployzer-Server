@@ -42,7 +42,7 @@ def pipeline():
     
     content = request.get_json(silent=False)
     
-    client = SSH_Client(content['host'], content['account'], content['ssh_file_path'], content['key_type'])
+    client = SSH_Client(content['host'], content['account'], content['ssh_file_path'], content['key_type'], content['path'])
     
     logger.info('receive content is : {}'.format(content))
     
