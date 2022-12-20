@@ -33,8 +33,8 @@ def build_and_deploy(client:SSH_Client, image_name, image_tag, container_name, p
     client.excute_command(cmd.update_git())
     client.excute_command(cmd.maven_build())
     client.excute_command(cmd.kill_container_if_exist(container_name=container_name))
-    client.excute_command(cmd.build_image(image_name=image_name, image_tag=image_tag))
-    client.excute_command(cmd.start_container(image_name=image_name, image_tag=image_tag, port=port, container_name=container_name))
+    client.excute_command(cmd.build_image_replace_old(image_name=image_name))
+    client.excute_command(cmd.start_container_use_latest_image(image_name=image_name, port=port, container_name=container_name))
     
 
 @app.route('/start', methods=['POST'])
