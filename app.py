@@ -1,90 +1,40 @@
-import os
-
-import paramiko
 from flask import Flask, request
+import logging
+from ssh_client import SSH_Client
+from pipeline_command import Pipeline_Command as cmd
+
+LOGGING_CONFIG = {
+    "version": 1,
+    "formatters": {
+        "default": {
+            "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
+            "datefmt": '%Y-%m-%d,%H:%M:%S',
+        }
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "stream": "ext://sys.stdout",
+            "formatter": "default",
+            "level": "INFO",
+        }
+    },
+}
+
+logging.config.dictConfig(LOGGING_CONFIG)
+
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-client = None
 
-def key_based_connect(host, account, ssh_path, key_type):
+def build_and_deploy(client:SSH_Client, image_name, image_tag, container_name, port):
     
-    global client
-    
-    pkey = None
-
-    real_client = paramiko.SSHClient()
-    real_client.load_host_keys(os.path.join(ssh_path, 'known_hosts'))
-    real_client.set_missing_host_key_policy(paramiko.WarningPolicy())
-    
-    if key_type == 'rsa':
-        pkey = paramiko.RSAKey.from_private_key_file(os.path.join(ssh_path, 'id_rsa'))
-    elif key_type == 'ed25519':
-        pkey = paramiko.Ed25519Key.from_private_key_file(os.path.join(ssh_path, 'id_ed25519'))
-
-    real_client.connect(host, username=account, pkey=pkey)
-    client = real_client
-
-def perform_log(command, variable_name:list, variable:list):
-    
-    
-    if variable_name is None:
-        print('perform {} command'.format(command))
-        return
-    
-    result = []
-    
-    for index, value in enumerate(variable_name):
-        result.append('{} is {}'.format(value, variable[index]))
-        
-    
-    print('perform {} command, '.format(command) + ', '.join(result))
-
-def cd(git_repository_path):
-    perform_log('cd', ['path'], [git_repository_path])
-    excute_command('cd {}'.format(git_repository_path))
-    
-def update_git():
-    perform_log('update_git', None, None)
-    excute_command('git pull')
-    
-def maven_build():
-    perform_log('maven package', None, None)
-    excute_command('mvn clean package')
-    
-def kill_container_if_exist(container_name):
-    perform_log('kill container if exist', ['container name'], [container_name])
-    excute_command('docker rm -f -v {}'.format(container_name))
-
-def build_image(image_name, image_tag):
-    perform_log('build image', ['image_name', 'tag'], [image_name, image_tag])
-    excute_command('docker build -t {}:{} .'.format(image_name, image_tag))
-    
-def start_container(image_name, image_tag, port, container_name):
-    perform_log('docker start container', ['image_name', 'tag', 'port', 'container_name'], [image_name, image_tag, port, container_name])
-    excute_command('docker run -d -p {}:{} --restart always --name {} {}:{}'.format(port, port, container_name, image_name, image_tag))
-
-def excute_command(command):
-    
-    print('command is : {}'.format(command))
-    
-    _stdin, stdout, _stderr = client.exec_command(command)
-    
-    lines = stdout.read().decode()
-    
-    print('output is : ')
-    
-    for line in lines.split("\n"):
-        print(line)
-        
-        
-def build_and_deploy(path, image_name, image_tag, container_name, port):
-    cd(path)
-    update_git()
-    maven_build()
-    kill_container_if_exist(container_name)
-    build_image(image_name, image_tag)
-    start_container(image_name, image_tag, port, container_name)
+    client.excute_command(cmd.update_git())
+    client.excute_command(cmd.maven_build())
+    client.excute_command(cmd.kill_container_if_exist(container_name=container_name))
+    client.excute_command(cmd.build_image(image_name=image_name, image_tag=image_tag))
+    client.excute_command(cmd.start_container(image_name=image_name, image_tag=image_tag, port=port, container_name=container_name))
     
 
 @app.route('/start', methods=['POST'])
@@ -92,13 +42,13 @@ def pipeline():
     
     content = request.get_json(silent=False)
     
-    print('receive content is : {}'.format(content))
+    client = SSH_Client(content['host'], content['account'], content['ssh_file_path'], content['key_type'])
     
-    key_based_connect(content['host'], content['account'], content['ssh_path'], content['key_type'])
+    logger.info('receive content is : {}'.format(content))
     
-    build_and_deploy(content['path'], content['image_name'], content['image_tag'], content['container_name'], content['port'])
+    build_and_deploy(client, content['image_name'], content['image_tag'], content['container_name'], content['port'])
 
-    return "Start building"
+    return "Finsh building"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4400)
