@@ -33,7 +33,7 @@ class SSH_Client:
         
         _stdin, stdout, _stderr = self.client.exec_command(appendPathCommand)
         
-        lines = stdout.read()
+        lines = stdout.read().decode(encoding='UTF-8')
         
         self.logger.info('output is : ')
         
