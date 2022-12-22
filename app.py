@@ -1,7 +1,8 @@
-from flask import Flask, request
 import logging.config
-from ssh_client import SSH_Client
+
+from flask import Flask, request
 from pipeline_command import Pipeline_Command as cmd
+from ssh_client import SSH_Client
 
 LOGGING_CONFIG = {
     "version": 1,
@@ -33,7 +34,8 @@ def build_and_deploy(client:SSH_Client, image_name, container_name, port):
     client.excute_command(cmd.update_git())
     client.excute_command(cmd.maven_build())
     client.excute_command(cmd.kill_container_if_exist(container_name=container_name))
-    client.excute_command(cmd.build_image_replace_old(image_name=image_name))
+    client.excute_command(cmd.delete_image(image_name=image_name))
+    client.excute_command(cmd.build_image(image_name=image_name))
     client.excute_command(cmd.start_container_use_latest_image(image_name=image_name, port=port, container_name=container_name))
     
 
