@@ -1,28 +1,10 @@
 import logging.config
 
 from flask import Flask, request
-from pipeline_command import Pipeline_Command as cmd
-from ssh_client import SSH_Client
+from pipeline_command.pipeline_command import Pipeline_Command as cmd
+from ssh.ssh_client import SSH_Client
 
-LOGGING_CONFIG = {
-    "version": 1,
-    "formatters": {
-        "default": {
-            "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s",
-            "datefmt": '%Y-%m-%d,%H:%M:%S',
-        }
-    },
-    "handlers": {
-        "console": {
-            "class": "logging.StreamHandler",
-            "stream": "ext://sys.stdout",
-            "formatter": "default",
-            "level": "INFO",
-        }
-    },
-}
-
-logging.config.dictConfig(LOGGING_CONFIG)
+logging.config.fileConfig('logging.conf')
 
 logger = logging.getLogger(__name__)
 

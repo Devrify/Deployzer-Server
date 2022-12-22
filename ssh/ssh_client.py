@@ -2,7 +2,8 @@ import logging
 import os
 
 import paramiko
-from pipeline_command import Pipeline_Command as cmd
+from pipeline_command.pipeline_command import Pipeline_Command as cmd
+
 
 class SSH_Client:
     

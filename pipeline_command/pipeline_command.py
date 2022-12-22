@@ -1,4 +1,3 @@
-# todo: replace old image
 class Pipeline_Command:
     @staticmethod
     def cd(path):
@@ -17,8 +16,8 @@ class Pipeline_Command:
         return 'docker rm -f -v {}'.format(container_name)
 
     @staticmethod
-    def build_image(image_name, image_tag):
-        return 'docker build -t {}:{} .'.format(image_name, image_tag)
+    def build_image(image_name):
+        return 'docker build -t {}:latest .'.format(image_name)
     
     @staticmethod
     def delete_image(image_name):
