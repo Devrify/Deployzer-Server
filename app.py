@@ -1,9 +1,11 @@
+import datetime
 import logging.config
 
 from flask import Flask, request
 from pipeline_command.pipeline_command import Pipeline_Command as cmd
 from ssh.ssh_client import SSH_Client
 
+logging.Formatter.converter = lambda *args: datetime.now(tz=datetime.timezone('Asia/Shanghai')).timetuple()
 logging.config.fileConfig('logging.conf')
 
 app = Flask(__name__)
