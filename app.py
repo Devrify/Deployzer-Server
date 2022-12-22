@@ -33,7 +33,7 @@ def pipeline():
     
     build_and_deploy(client, content['image_name'], content['container_name'], content['port'])
 
-    return "Finsh building"
+    return {"message":"Finsh building"}
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4400)
