@@ -6,8 +6,6 @@ from ssh.ssh_client import SSH_Client
 
 logging.config.fileConfig('logging.conf')
 
-logger = logging.getLogger(__name__)
-
 app = Flask(__name__)
 
 
@@ -23,6 +21,8 @@ def build_and_deploy(client:SSH_Client, image_name, container_name, port):
 
 @app.route('/start', methods=['POST'])
 def pipeline():
+    
+    logger = logging.getLogger(__name__)
     
     content = request.get_json(silent=False)
     

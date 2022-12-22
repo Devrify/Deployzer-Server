@@ -36,7 +36,5 @@ class SSH_Client:
         
         lines = stdout.read().decode(encoding='utf-8')
         
-        self.logger.info('output is : ')
-        
         for line in lines.split("\n"):
             self.logger.info(line)
