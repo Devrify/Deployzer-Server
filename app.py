@@ -47,9 +47,9 @@ def pipeline():
     
     logger.info('receive content is : {}'.format(content))
     
-    if content['mode'] == 0:
+    if content['mode'] == '0':
         build_and_deploy(client, content['image_name'], content['container_name'], content['port'], content['repository_name'])
-    elif content['mode'] == 1:
+    elif content['mode'] == '1':
         build_and_upload_image(client, content['image_name'], content['repository_name'])
 
     return {"message":"Finsh building"}
