@@ -10,13 +10,18 @@ logging.config.fileConfig('logging.conf')
 
 app = Flask(__name__)
 
-def build_and_upload_image(client:SSH_Client, image_name:str, repository_name:str):
+def build_and_push(client:SSH_Client, image_name, container_name, repository_name:str):
     client.excute_command(cmd.update_git())
     client.excute_command(cmd.maven_build())
+    client.excute_command(cmd.kill_container_if_exist(container_name=container_name))
     client.excute_command(cmd.delete_image(image_name=image_name))
     client.excute_command(cmd.build_image(image_name=image_name))
     client.excute_command(cmd.tag_image_to_docker_hub(image_name, repository_name))
     client.excute_command(cmd.push_image_to_docker_hub(image_name, repository_name))
+
+def build_and_deploy_to_raspi(clientBuild:SSH_Client, clientDeploy:SSH_Client, image_name:str, container_name:str, repository_name:str):
+
+    build_and_push(clientBuild, image_name, container_name, repository_name)
 
     """
     image_name : 构建的 image 名称
@@ -26,13 +31,7 @@ def build_and_upload_image(client:SSH_Client, image_name:str, repository_name:st
     """
 def build_and_deploy(client:SSH_Client, image_name, container_name, port, repository_name:str):
     
-    client.excute_command(cmd.update_git())
-    client.excute_command(cmd.maven_build())
-    client.excute_command(cmd.kill_container_if_exist(container_name=container_name))
-    client.excute_command(cmd.delete_image(image_name=image_name))
-    client.excute_command(cmd.build_image(image_name=image_name))
-    client.excute_command(cmd.tag_image_to_docker_hub(image_name, repository_name))
-    client.excute_command(cmd.push_image_to_docker_hub(image_name, repository_name))
+    build_and_push(client, image_name, container_name, repository_name)
     client.excute_command(cmd.start_container_use_latest_image(image_name=image_name, port=port, container_name=container_name))
     
 
@@ -50,7 +49,7 @@ def pipeline():
     if content['mode'] == '0':
         build_and_deploy(client, content['image_name'], content['container_name'], content['port'], content['repository_name'])
     elif content['mode'] == '1':
-        build_and_upload_image(client, content['image_name'], content['repository_name'])
+        build_and_deploy_to_raspi(client, None, content['image_name'], content['container_name'], content['repository_name'])
 
     return {"message":"Finsh building"}
 
