@@ -1,5 +1,5 @@
 #!/bin/bash
-image_name="python/pipeline:latest"
+image_name="python/pipeline"
 repository_tag="python-pipeline"
 repository_name="nopepsi/app"
 full_repository_path="${repository_name}:${repository_tag}"
@@ -16,8 +16,7 @@ kill_container()
 cd /root/pythonProject/lightweight-pipeline
 git pull
 kill_container || true
-docker image rm ${image_name}
 docker build -t ${image_name} .
-docker tag ${image_name} ${full_repository_path}
+docker tag ${image_name}:latest ${full_repository_path}
 docker push ${full_repository_path}
 docker run -d -p 4400:4400 --restart always --name ${container_name} -v ${ssh_path_in_host}:${ssh_path_in_container}:ro ${image_name}
