@@ -16,6 +16,7 @@ kill_container()
 cd /root/pythonProject/lightweight-pipeline
 git pull
 kill_container || true
+docker image rm ${image_name}
 docker build -t ${image_name} .
 docker tag ${image_name} ${full_repository_path}
 docker push ${full_repository_path}
