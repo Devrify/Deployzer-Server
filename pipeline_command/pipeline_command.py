@@ -20,6 +20,18 @@ class Pipeline_Command:
         return 'docker build -t {}:latest .'.format(image_name)
     
     @staticmethod
+    def tag_image_to_docker_hub(image_name:str, repository_name:str):
+        image_name_dash = image_name.replace('/', '-')
+        full_name = repository_name + ':' + image_name_dash
+        return 'docker tag {}:latest {}'.format(image_name, full_name)
+    
+    @staticmethod
+    def push_image_to_docker_hub(image_name:str, repository_name:str):
+        image_name_dash = image_name.replace('/', '-')
+        full_name = repository_name + ':' + image_name_dash
+        return 'docker push {}'.format(full_name)
+    
+    @staticmethod
     def delete_image(image_name):
         return 'docker image rm {}'.format(image_name)
     
