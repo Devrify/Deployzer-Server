@@ -14,7 +14,7 @@ class SSH_Client:
     key_type : 密钥类型
     git_repository_path : github 地址 xxxx.git
     """
-    def __init__(self, host, account, ssh_file_path, key_type, git_repository_path):
+    def __init__(self, host, account, ssh_file_path, key_type, git_repository_path, ssh_port=22):
         
         self.logger = logging.getLogger(__name__)
         
@@ -34,7 +34,7 @@ class SSH_Client:
             pkey = paramiko.Ed25519Key.from_private_key_file(os.path.join(ssh_file_path, 'id_ed25519'))
 
         # 连接
-        self.client.connect(host, username=account, pkey=pkey)
+        self.client.connect(host, username=account, pkey=pkey, port=ssh_port)
     
     '''
     执行命令
