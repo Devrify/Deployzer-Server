@@ -47,12 +47,12 @@ def pipeline():
     logger = logging.getLogger(__name__)
     
     content = request.get_json(silent=False)
-    
         
     logger.info('receive content is : {}'.format(content))
     
+    build_client = SSH_Client(content['host'], content['account'], content['ssh_file_path'], content['key_type'], content['git_repositry_path'])
+    
     if content['mode'] == '0':
-        build_client = SSH_Client(content['host'], content['account'], content['ssh_file_path'], content['key_type'], content['git_repositry_path'])
         build_and_deploy(build_client, content['image_name'], content['container_name'], content['port'], content['repository_name'])
     elif content['mode'] == '1':
         deploy_client = SSH_Client(content['ras_host'], content['ras_account'], content['ssh_file_path'], content['key_type'], content['git_repositry_path'], content['ras_port'])
