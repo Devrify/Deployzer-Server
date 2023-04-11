@@ -40,8 +40,12 @@ class Pipeline_Command:
         return 'docker pull {}'.format(full_name)
     
     @staticmethod
-    def delete_image(image_name):
+    def delete_local_image(image_name):
         return 'docker image rm {}'.format(image_name)
+    
+    @staticmethod
+    def delete_local_remote_tagged_image(image_name):
+        return 'docker image rm {}'.format(Pipeline_Command.local_image_name_to_repositry_image_name(image_name))
     
     @staticmethod
     def start_container_use_latest_image(image_name, port, container_name):

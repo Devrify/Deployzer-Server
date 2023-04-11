@@ -14,7 +14,8 @@ def build_and_push(client:SSH_Client, image_name, container_name, repository_nam
     client.excute_command(cmd.update_git())
     client.excute_command(cmd.maven_build())
     client.excute_command(cmd.kill_container_if_exist(container_name=container_name))
-    client.excute_command(cmd.delete_image(image_name=image_name))
+    client.excute_command(cmd.delete_local_image(image_name=image_name))
+    client.excute_command(cmd.delete_local_remote_tagged_image(image_name=image_name))
     client.excute_command(cmd.build_image(image_name=image_name))
     client.excute_command(cmd.tag_image_to_docker_hub(image_name, repository_name))
     client.excute_command(cmd.push_image_to_docker_hub(image_name, repository_name))
@@ -24,7 +25,7 @@ def build_and_deploy_to_raspi(clientBuild:SSH_Client, clientDeploy:SSH_Client, i
     full_name = cmd.local_image_name_to_repositry_image_name(image_name, repository_name)
     
     build_and_push(clientBuild, image_name, container_name, repository_name)
-    clientDeploy.excute_command(cmd.delete_image(image_name=full_name))
+    clientDeploy.excute_command(cmd.delete_local_image(image_name=full_name))
     clientDeploy.excute_command(cmd.pull_image_from_private_repository(image_name, repository_name))
     clientDeploy.excute_command(cmd.kill_container_if_exist(container_name))
     clientDeploy.excute_command(cmd.start_container_use_latest_image(image_name=full_name, port=port, container_name=container_name))
