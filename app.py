@@ -11,11 +11,14 @@ logging.config.fileConfig('logging.conf')
 app = Flask(__name__)
 
 def build_and_push(client:SSH_Client, image_name, container_name, repository_name:str):
+    
+    full_name = cmd.local_image_name_to_repositry_image_name(image_name, repository_name)
+    
     client.excute_command(cmd.update_git())
     client.excute_command(cmd.maven_build())
     client.excute_command(cmd.kill_container_if_exist(container_name=container_name))
     client.excute_command(cmd.delete_local_image(image_name=image_name))
-    client.excute_command(cmd.delete_local_remote_tagged_image(image_name=image_name))
+    client.excute_command(cmd.delete_local_image(image_name=full_name))
     client.excute_command(cmd.build_image(image_name=image_name))
     client.excute_command(cmd.tag_image_to_docker_hub(image_name, repository_name))
     client.excute_command(cmd.push_image_to_docker_hub(image_name, repository_name))

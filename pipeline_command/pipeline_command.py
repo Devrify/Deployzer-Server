@@ -44,10 +44,6 @@ class Pipeline_Command:
         return 'docker image rm {}'.format(image_name)
     
     @staticmethod
-    def delete_local_remote_tagged_image(image_name):
-        return 'docker image rm {}'.format(Pipeline_Command.local_image_name_to_repositry_image_name(image_name))
-    
-    @staticmethod
     def start_container_use_latest_image(image_name, port, container_name):
         return 'docker run -d -p {}:{} --restart always --name {} {}'.format(port, port, container_name, image_name)
         
