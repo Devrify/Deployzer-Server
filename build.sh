@@ -6,23 +6,21 @@ full_repository_path="${repository_name}:${repository_tag}"
 container_name="pipeline"
 ssh_path_in_container=/root/.ssh
 ssh_path_in_host=~/.ssh
-echo "${full_repository_path}"
 
-kill_container()
-{
-    docker rm -f -v ${container_name}
-}
-
-remove_image()
-{
-    docker image rm ${image_name}
-    docker image rm ${full_repository_path}
-}
-
+# git pull
 cd /root/pythonProject/lightweight-pipeline
 git pull
-kill_container || true
-remove_image || true
+
+# remove container
+docker rm -f -v ${container_name}
+sleep 1
+
+# remove image
+docker image rm ${image_name}
+sleep 1
+docker image rm ${full_repository_path}
+sleep 1
+
 docker build -t ${image_name} .
 docker tag ${image_name}:latest ${full_repository_path}
 docker push ${full_repository_path}
