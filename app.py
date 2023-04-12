@@ -29,6 +29,7 @@ def build_and_deploy_to_raspi(clientBuild:SSH_Client, clientDeploy:SSH_Client, i
     
     build_and_push(clientBuild, image_name, container_name, repository_name)
     clientDeploy.excute_command(cmd.kill_container_if_exist(container_name))
+    clientDeploy.excute_command(cmd.delete_local_image(image_name=image_name))
     clientDeploy.excute_command(cmd.delete_local_image(image_name=full_name))
     clientDeploy.excute_command(cmd.pull_image_from_private_repository(image_name, repository_name))
     clientDeploy.excute_command(cmd.start_container_use_latest_image(image_name=full_name, port=port, container_name=container_name))
