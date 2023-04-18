@@ -10,7 +10,7 @@ logging.config.fileConfig('logging.conf')
 
 app = Flask(__name__)
 
-count_to_push = 0
+count_to_push = 99999
 
 def build_and_push(client:SSH_Client, image_name, container_name, repository_name:str):
     
@@ -26,7 +26,7 @@ def build_and_push(client:SSH_Client, image_name, container_name, repository_nam
     client.excute_command(cmd.build_image(image_name=image_name))
     client.excute_command(cmd.tag_image_to_docker_hub(image_name, repository_name))
     
-    if count_to_push > 10:
+    if count_to_push > 99999:
         client.excute_command(cmd.push_image_to_docker_hub(image_name, repository_name))
         count_to_push = 0
     else:
