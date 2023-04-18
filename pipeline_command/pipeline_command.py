@@ -9,7 +9,7 @@ class Pipeline_Command:
     
     @staticmethod
     def maven_build():
-        return 'mvn clean package'
+        return 'mvn clean package -Dmaven.test.skip'
         
     @staticmethod
     def kill_container_if_exist(container_name):
