@@ -14,6 +14,8 @@ count_to_push = 0
 
 def build_and_push(client:SSH_Client, image_name, container_name, repository_name:str):
     
+    global count_to_push
+    
     full_name = cmd.local_image_name_to_repositry_image_name(image_name, repository_name)
     
     client.excute_command(cmd.update_git())
