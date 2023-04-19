@@ -23,5 +23,4 @@ sleep 1
 
 docker build -t ${image_name} .
 docker tag ${image_name}:latest ${full_repository_path}
-docker push ${full_repository_path}
 docker run -d -p 4400:4400 --restart always --name ${container_name} -v ${ssh_path_in_host}:${ssh_path_in_container}:ro ${image_name}
