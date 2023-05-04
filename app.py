@@ -1,4 +1,3 @@
-import datetime
 import logging.config
 
 from flask import Flask, request
@@ -26,8 +25,9 @@ def build_and_push(client:SSH_Client, image_name, container_name, repository_nam
     client.excute_command(cmd.build_image(image_name=image_name))
     client.excute_command(cmd.tag_image_to_docker_hub(image_name, repository_name))
     
+    # 目前不会推送镜像到 docker hub, 因为速度太慢了
     if count_to_push > 99999:
-        client.excute_command(cmd.push_image_to_docker_hub(image_name, repository_name))
+        #client.excute_command(cmd.push_image_to_docker_hub(image_name, repository_name))
         count_to_push = 0
     else:
         count_to_push += 1
