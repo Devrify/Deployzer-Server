@@ -44,7 +44,9 @@ class Pipeline_Command:
         return 'docker image rm {}'.format(image_name)
     
     @staticmethod
-    def start_container_use_latest_image(image_name, port, container_name):
+    def start_container_use_latest_image(image_name, port, container_name, privileged:bool=False):
+        if privileged:
+            return 'docker run -d --privileged -p {}:{} --restart always --name {} {}'.format(port, port, container_name, image_name)
         return 'docker run -d -p {}:{} --restart always --name {} {}'.format(port, port, container_name, image_name)
         
     @staticmethod

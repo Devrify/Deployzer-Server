@@ -11,14 +11,15 @@ app = Flask(__name__)
 
 count_to_push = 99999
 
-def build_and_push(client:SSH_Client, image_name, container_name, repository_name:str):
+def build_and_push(client:SSH_Client, image_name, container_name, repository_name:str, maven:bool=True):
     
     global count_to_push
     
     full_name = cmd.local_image_name_to_repositry_image_name(image_name, repository_name)
     
     client.excute_command(cmd.update_git())
-    client.excute_command(cmd.maven_build())
+    if maven:
+        client.excute_command(cmd.maven_build())
     client.excute_command(cmd.kill_container_if_exist(container_name=container_name))
     client.excute_command(cmd.delete_local_image(image_name=image_name))
     client.excute_command(cmd.delete_local_image(image_name=full_name))
@@ -32,11 +33,16 @@ def build_and_push(client:SSH_Client, image_name, container_name, repository_nam
     else:
         count_to_push += 1
 
-def build_and_deploy_to_raspi(clientBuild:SSH_Client, clientDeploy:SSH_Client, image_name:str, container_name:str, repository_name:str, port:str):
-    build_and_push(clientDeploy, image_name, container_name, repository_name)
-    clientDeploy.excute_command(cmd.start_container_use_latest_image(image_name=image_name, port=port, container_name=container_name))
+    """
+    部署到树莓派, 连接到 frp
+    """
+def build_and_deploy_to_raspi(clientBuild:SSH_Client, clientDeploy:SSH_Client, image_name:str, container_name:str, repository_name:str, port:str, maven:str, privileged:bool=False):
+    build_and_push(clientDeploy, image_name, container_name, repository_name, maven=maven)
+    clientDeploy.excute_command(cmd.start_container_use_latest_image(image_name=image_name, port=port, container_name=container_name, privileged=privileged))
 
     """
+    部署到远端服务器
+    
     image_name : 构建的 image 名称
     container_name : 构建的容器名称
     port : 绑定远端服务器的端口
@@ -64,7 +70,10 @@ def pipeline():
     elif content['mode'] == '1':
         deploy_client = SSH_Client(content['ras_host'], content['ras_account'], content['ssh_file_path'], content['key_type'], content['git_repositry_path'], content['ras_port'])
         build_and_deploy_to_raspi(build_client, deploy_client, content['image_name'], content['container_name'], content['repository_name'], content['port'])
-
+    elif content['mode'] == '2':
+        deploy_client = SSH_Client(content['ras_host'], content['ras_account'], content['ssh_file_path'], content['key_type'], content['git_repositry_path'], content['ras_port'])
+        build_and_deploy_to_raspi(build_client, deploy_client, content['image_name'], content['container_name'], content['repository_name'], content['port'], content['maven'], content['privileged'])
+        
     return {"message":"Finsh building"}
 
 if __name__ == '__main__':
