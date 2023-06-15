@@ -72,7 +72,7 @@ def pipeline():
         build_and_deploy_to_raspi(build_client, deploy_client, content['image_name'], content['container_name'], content['repository_name'], content['port'])
     elif content['mode'] == '2':
         deploy_client = SSH_Client(content['ras_host'], content['ras_account'], content['ssh_file_path'], content['key_type'], content['git_repositry_path'], content['ras_port'])
-        build_and_deploy_to_raspi(build_client, deploy_client, content['image_name'], content['container_name'], content['repository_name'], content['port'], content['maven'], content['privileged'])
+        build_and_deploy_to_raspi(build_client, deploy_client, content['image_name'], content['container_name'], content['repository_name'], content['port'], content['maven'].lower() == 'true', content['privileged'].lower() == 'true')
         
     return {"message":"Finsh building"}
 
