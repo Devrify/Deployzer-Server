@@ -36,7 +36,7 @@ def build_and_push(client:SSH_Client, image_name, container_name, repository_nam
     """
     部署到树莓派, 连接到 frp
     """
-def build_and_deploy_to_raspi(clientBuild:SSH_Client, clientDeploy:SSH_Client, image_name:str, container_name:str, repository_name:str, port:str, maven:str, privileged:bool=False):
+def build_and_deploy_to_raspi(clientBuild:SSH_Client, clientDeploy:SSH_Client, image_name:str, container_name:str, repository_name:str, port:str, maven:str=True, privileged:bool=False):
     build_and_push(clientDeploy, image_name, container_name, repository_name, maven=maven)
     clientDeploy.excute_command(cmd.start_container_use_latest_image(image_name=image_name, port=port, container_name=container_name, privileged=privileged))
 
