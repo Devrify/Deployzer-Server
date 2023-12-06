@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.devrify.deployzerserver.dao.DeployTokenDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.devrify.deployzerserver.entity.vo.DeployTokenVo">
+        <id column="deploy_token_id" property="deployTokenId" />
+        <result column="created_by" property="createdBy" />
+        <result column="creation_date" property="creationDate" />
+        <result column="last_updated_by" property="lastUpdatedBy" />
+        <result column="last_updated_date" property="lastUpdatedDate" />
+        <result column="token" property="token" />
+        <result column="token_status" property="tokenStatus" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        created_by,
+        creation_date,
+        last_updated_by,
+        last_updated_date,
+        deploy_token_id, token, token_status
+    </sql>
+
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.devrify.deployzerserver.dao.DeployLogDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.devrify.deployzerserver.entity.vo.DeployLogVo">
+        <id column="deploy_log_id" property="deployLogId" />
+        <result column="created_by" property="createdBy" />
+        <result column="creation_date" property="creationDate" />
+        <result column="last_updated_by" property="lastUpdatedBy" />
+        <result column="last_updated_date" property="lastUpdatedDate" />
+        <result column="deploy_execution_id" property="deployExecutionId" />
+        <result column="log_content" property="logContent" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        created_by,
+        creation_date,
+        last_updated_by,
+        last_updated_date,
+        deploy_log_id, deploy_execution_id, log_content
+    </sql>
+
+</mapper>
