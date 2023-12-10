@@ -7,10 +7,13 @@ import com.devrify.deployzerserver.entity.dto.RegistrationDto;
 import com.devrify.deployzerserver.entity.dto.ReportCommandResultDto;
 import com.devrify.deployzerserver.entity.dto.ResultDto;
 import com.devrify.deployzerserver.entity.vo.DeployClientVo;
+import com.devrify.deployzerserver.entity.vo.DeployTemplateVo;
 import com.devrify.deployzerserver.service.impl.DeployClientServiceImpl;
+import com.devrify.deployzerserver.service.impl.DeployTemplateServiceImpl;
 import com.devrify.deployzerserver.service.impl.DeployTokenServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +34,8 @@ public class DeployzerFacadeController {
     private final DeployTokenServiceImpl deployTokenService;
 
     private final DeployClientServiceImpl deployClientService;
+
+    private final DeployTemplateServiceImpl deployTemplateService;
 
     @PostMapping("/registration")
     public ResultDto<DeployClientVo> registration(
@@ -90,6 +95,55 @@ public class DeployzerFacadeController {
         // 更新状态
         this.deployClientService.updateClientStatusByUuid(
                     reportCommandResultDto.getUuid(), DeployzerClientStatusEnum.WAITING);
+        return ResultDto.success();
+    }
+
+    @PostMapping("/create-command-template")
+    public ResultDto<String> createCommandTemplate(
+            @RequestHeader("Authorization") String token,
+            @RequestBody DeployTemplateVo deployTemplateVo) {
+        log.info(deployTemplateVo.toString());
+        // 检查 token
+        try {
+            this.checkIfTokenValid(token);
+        } catch (DeployzerException e) {
+            return ResultDto.fail(e.getMessage());
+        }
+        // 检查属性是否为空
+        if (StringUtils.isAnyBlank(deployTemplateVo.getTemplateContent(), deployTemplateVo.getTemplateName())) {
+            return ResultDto.fail("命令模板名称， 内容为空");
+        }
+        // 检查模板是否已存在
+        if (deployTemplateService.checkIfTemplateExist(deployTemplateVo.getTemplateName())) {
+            return ResultDto.fail("命令模板的名称已存在");
+        }
+        this.deployTemplateService.save(deployTemplateVo);
+        return ResultDto.success();
+    }
+
+    @PostMapping("/update-command-template")
+    public ResultDto<String> updateCommandTemplate(
+            @RequestHeader("Authorization") String token,
+            @RequestBody DeployTemplateVo deployTemplateVo) {
+        log.info(deployTemplateVo.toString());
+        // 检查 token
+        try {
+            this.checkIfTokenValid(token);
+        } catch (DeployzerException e) {
+            return ResultDto.fail(e.getMessage());
+        }
+        // 检查属性是否为空
+        if (ObjectUtils.isEmpty(deployTemplateVo.getDeployTemplateId())) {
+            return ResultDto.fail("命令模板的 id 为空");
+        }
+        if (StringUtils.isAnyBlank(deployTemplateVo.getTemplateContent(), deployTemplateVo.getTemplateName())) {
+            return ResultDto.fail("命令模板名称， 内容为空");
+        }
+        // 检查模板是否已存在
+        if (!deployTemplateService.checkIfTemplateExist(deployTemplateVo.getDeployTemplateId())) {
+            return ResultDto.fail("命令模板不存在");
+        }
+        this.deployTemplateService.updateById(deployTemplateVo);
         return ResultDto.success();
     }
 

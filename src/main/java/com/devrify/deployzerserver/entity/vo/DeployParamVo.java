@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import java.io.Serial;
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 /**
@@ -30,11 +31,11 @@ public class DeployParamVo extends BaseVo implements Serializable {
     @TableId(value = "deploy_param_id", type = IdType.AUTO)
     private Long deployParamId;
 
-    @TableField("param_content")
-    private String paramContent;
+    @JsonProperty("param_key")
+    private String paramKey;
 
-    @TableField("param_name")
-    private String paramName;
+    @JsonProperty("param_value")
+    private String paramValue;
 
     @TableField("deploy_template_id")
     private Long deployTemplateId;
