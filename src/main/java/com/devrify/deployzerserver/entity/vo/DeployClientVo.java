@@ -21,6 +21,7 @@ import lombok.*;
 @EqualsAndHashCode(callSuper = false)
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @TableName("deploy_client_t")
 public class DeployClientVo extends BaseVo implements Serializable {
 
