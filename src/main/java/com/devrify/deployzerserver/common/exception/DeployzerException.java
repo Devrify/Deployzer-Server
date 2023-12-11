@@ -1,17 +1,16 @@
 package com.devrify.deployzerserver.common.exception;
 
-public class DeployzerException extends Exception{
+public class DeployzerException extends Exception {
     // Parameterless Constructor
-    public DeployzerException() {}
+    public DeployzerException() {
+    }
 
     // Constructor that accepts a message
-    public DeployzerException(String message)
-    {
+    public DeployzerException(String message) {
         super(message);
     }
 
-    public DeployzerException(String message, Exception e)
-    {
+    public DeployzerException(String message, Exception e) {
         super(message, e);
     }
 }

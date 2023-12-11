@@ -4,20 +4,21 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.devrify.deployzerserver.entity.vo.DeployClientVo">
-        <id column="deploy_client_id" property="deployClientId" />
-        <result column="created_by" property="createdBy" />
-        <result column="creation_date" property="creationDate" />
-        <result column="last_updated_by" property="lastUpdatedBy" />
-        <result column="last_updated_date" property="lastUpdatedDate" />
-        <result column="client_name" property="clientName" />
-        <result column="client_ip" property="clientIp" />
-        <result column="client_uuid" property="clientUuid" />
-        <result column="client_status" property="clientStatus" />
+        <id column="deploy_client_id" property="deployClientId"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="creation_date" property="creationDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+        <result column="client_name" property="clientName"/>
+        <result column="client_ip" property="clientIp"/>
+        <result column="client_uuid" property="clientUuid"/>
+        <result column="client_status" property="clientStatus"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        created_by,
+        created_by
+        ,
         creation_date,
         last_updated_by,
         last_updated_date,

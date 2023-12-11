@@ -4,20 +4,21 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.devrify.deployzerserver.entity.vo.DeployExecutionVo">
-        <id column="deploy_execution_id" property="deployExecutionId" />
-        <result column="created_by" property="createdBy" />
-        <result column="creation_date" property="creationDate" />
-        <result column="last_updated_by" property="lastUpdatedBy" />
-        <result column="last_updated_date" property="lastUpdatedDate" />
-        <result column="deploy_template_id" property="deployTemplateId" />
-        <result column="deploy_param_id" property="deployParamId" />
-        <result column="deploy_client_id" property="deployClientId" />
-        <result column="execution_status" property="executionStatus" />
+        <id column="deploy_execution_id" property="deployExecutionId"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="creation_date" property="creationDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+        <result column="deploy_template_id" property="deployTemplateId"/>
+        <result column="deploy_param_id" property="deployParamId"/>
+        <result column="deploy_client_id" property="deployClientId"/>
+        <result column="execution_status" property="executionStatus"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        created_by,
+        created_by
+        ,
         creation_date,
         last_updated_by,
         last_updated_date,

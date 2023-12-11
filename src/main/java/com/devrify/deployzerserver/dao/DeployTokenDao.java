@@ -1,12 +1,12 @@
 package com.devrify.deployzerserver.dao;
 
-import com.devrify.deployzerserver.entity.vo.DeployTokenVo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.devrify.deployzerserver.entity.vo.DeployTokenVo;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
  * <p>
- *  Mapper 接口
+ * Mapper 接口
  * </p>
  *
  * @author houance

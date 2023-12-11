@@ -2,24 +2,27 @@ package com.devrify.deployzerserver.controller;
 
 import com.devrify.deployzerserver.common.enums.DeployzerClientStatusEnum;
 import com.devrify.deployzerserver.common.exception.DeployzerException;
-import com.devrify.deployzerserver.entity.dto.GetCommandResponseDto;
-import com.devrify.deployzerserver.entity.dto.RegistrationDto;
-import com.devrify.deployzerserver.entity.dto.ReportCommandResultDto;
-import com.devrify.deployzerserver.entity.dto.ResultDto;
+import com.devrify.deployzerserver.entity.dto.*;
 import com.devrify.deployzerserver.entity.vo.DeployClientVo;
+import com.devrify.deployzerserver.entity.vo.DeployExecutionVo;
+import com.devrify.deployzerserver.entity.vo.DeployParamVo;
 import com.devrify.deployzerserver.entity.vo.DeployTemplateVo;
 import com.devrify.deployzerserver.service.impl.DeployClientServiceImpl;
-import com.devrify.deployzerserver.service.impl.DeployTemplateServiceImpl;
+import com.devrify.deployzerserver.service.impl.DeployCommandServiceImpl;
+import com.devrify.deployzerserver.service.impl.DeployExecutionServiceImpl;
 import com.devrify.deployzerserver.service.impl.DeployTokenServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * <p>
- *  前端控制器
+ * 前端控制器
  * </p>
  *
  * @author houance
@@ -35,11 +38,14 @@ public class DeployzerFacadeController {
 
     private final DeployClientServiceImpl deployClientService;
 
-    private final DeployTemplateServiceImpl deployTemplateService;
+    private final DeployExecutionServiceImpl deployExecutionService;
+
+    private final DeployCommandServiceImpl deployCommandService;
 
     @PostMapping("/registration")
     public ResultDto<DeployClientVo> registration(
             @RequestHeader("Authorization") String token, @RequestBody RegistrationDto registrationDto) {
+        log.info(registrationDto.toString());
         // 检查 token
         try {
             this.checkIfTokenValid(token);
@@ -72,7 +78,7 @@ public class DeployzerFacadeController {
         }
         // todo: 获取命令
 
-        return ResultDto.success(new GetCommandResponseDto("java --version"));
+        return ResultDto.success(new GetCommandResponseDto(1L, "java --version"));
     }
 
     @PostMapping("/report-command-result")
@@ -86,64 +92,71 @@ public class DeployzerFacadeController {
         } catch (DeployzerException e) {
             return ResultDto.fail(e.getMessage());
         }
-        // 检查 uuid 是否为空
-        if (StringUtils.isBlank(reportCommandResultDto.getUuid())) {
-            return ResultDto.fail("uuid 为空");
+        // 检查 execution id 是否有效
+        if (ObjectUtils.isEmpty(reportCommandResultDto.getDeployExecutionId())) {
+            return ResultDto.fail("execution id 为空");
+        }
+        DeployExecutionVo databaseResult =
+                this.deployExecutionService.getById(reportCommandResultDto.getDeployExecutionId());
+        if (ObjectUtils.isEmpty(databaseResult)) {
+            return ResultDto.fail("execution id 找不到记录:" + reportCommandResultDto.getDeployExecutionId());
         }
         // todo:保存 log
 
         // 更新状态
-        this.deployClientService.updateClientStatusByUuid(
-                    reportCommandResultDto.getUuid(), DeployzerClientStatusEnum.WAITING);
-        return ResultDto.success();
-    }
-
-    @PostMapping("/create-command-template")
-    public ResultDto<String> createCommandTemplate(
-            @RequestHeader("Authorization") String token,
-            @RequestBody DeployTemplateVo deployTemplateVo) {
-        log.info(deployTemplateVo.toString());
-        // 检查 token
         try {
-            this.checkIfTokenValid(token);
+            this.deployClientService.updateClientStatusByClientId(
+                    databaseResult.getDeployClientId(), DeployzerClientStatusEnum.WAITING);
         } catch (DeployzerException e) {
             return ResultDto.fail(e.getMessage());
         }
-        // 检查属性是否为空
-        if (StringUtils.isAnyBlank(deployTemplateVo.getTemplateContent(), deployTemplateVo.getTemplateName())) {
-            return ResultDto.fail("命令模板名称， 内容为空");
-        }
-        // 检查模板是否已存在
-        if (deployTemplateService.checkIfTemplateExist(deployTemplateVo.getTemplateName())) {
-            return ResultDto.fail("命令模板的名称已存在");
-        }
-        this.deployTemplateService.save(deployTemplateVo);
         return ResultDto.success();
     }
 
-    @PostMapping("/update-command-template")
-    public ResultDto<String> updateCommandTemplate(
-            @RequestHeader("Authorization") String token,
-            @RequestBody DeployTemplateVo deployTemplateVo) {
-        log.info(deployTemplateVo.toString());
-        // 检查 token
+    @PostMapping("create-template-param")
+    public ResultDto<String> createTemplateAndParam(@RequestBody CreateTemplateParamDto createTemplateParamDto) {
+        log.info(createTemplateParamDto.toString());
+        // 检查属性
+        if (ObjectUtils.anyNull(createTemplateParamDto, createTemplateParamDto.getDeployTemplateVo())) {
+            return ResultDto.fail("dto 或者命令模板为空");
+        }
         try {
-            this.checkIfTokenValid(token);
+            this.deployCommandService.saveOrUpdateTemplateAndParam(
+                    createTemplateParamDto.getDeployTemplateVo(),
+                    createTemplateParamDto.getDeployParamVos()
+            );
         } catch (DeployzerException e) {
             return ResultDto.fail(e.getMessage());
         }
+        return ResultDto.success();
+    }
+
+    @PostMapping("/update-param")
+    public ResultDto<String> updateParam(@RequestBody List<DeployParamVo> deployParamVos) {
+        log.info(deployParamVos.toString());
         // 检查属性是否为空
-        if (ObjectUtils.isEmpty(deployTemplateVo.getDeployTemplateId())) {
-            return ResultDto.fail("命令模板的 id 为空");
+        if (CollectionUtils.isEmpty(deployParamVos)) {
+            return ResultDto.fail("param vos 为空");
         }
-        if (StringUtils.isAnyBlank(deployTemplateVo.getTemplateContent(), deployTemplateVo.getTemplateName())) {
-            return ResultDto.fail("命令模板名称， 内容为空");
+        try {
+            this.deployCommandService.updateParam(deployParamVos);
+        } catch (DeployzerException e) {
+            return ResultDto.fail(e.getMessage());
         }
-        // 检查模板是否已存在
-        if (!deployTemplateService.checkIfTemplateExist(deployTemplateVo.getDeployTemplateId())) {
-            return ResultDto.fail("命令模板不存在");
+        return ResultDto.success();
+    }
+
+    @PostMapping("/update-template")
+    public ResultDto<String> updateTemplate(@RequestBody DeployTemplateVo deployTemplateVo) {
+        log.info(deployTemplateVo.toString());
+        if (ObjectUtils.isEmpty(deployTemplateVo)) {
+            return ResultDto.fail("template vo 为空");
         }
-        this.deployTemplateService.updateById(deployTemplateVo);
+        try {
+            this.deployCommandService.updateTemplate(deployTemplateVo);
+        } catch (DeployzerException e) {
+            return ResultDto.fail(e.getMessage());
+        }
         return ResultDto.success();
     }
 

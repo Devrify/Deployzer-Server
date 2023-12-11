@@ -20,9 +20,9 @@ public class GenerateCode {
         //这里按着给的注解修改参数即可
 
         //手动配置数据源
-        String url="xxxxx";   //注意修改数据库名
-        String name="xxxxx";
-        String password="xxxxx";
+        String url = "xxxxx";   //注意修改数据库名
+        String name = "xxxxx";
+        String password = "xxxxx";
 
         //数据库表的设置
         List<String> listTable = List.of(
@@ -33,13 +33,12 @@ public class GenerateCode {
                 "deploy_template_t",
                 "deploy_token_t");  //设置需要自动代码生成的表名
         List<String> listTableSuffix = List.of("_t");    //设置 过滤 表的后缀
-        List<String> listTablePrefix = Arrays.asList("t_","c_"); //设置 过滤 表的后缀
+        List<String> listTablePrefix = Arrays.asList("t_", "c_"); //设置 过滤 表的后缀
 
         //基本信息
         String author = "houance";    //作者
         String parent = "com.devrify";   //父包名
         String module = "deployzerserver";   //模块包名
-
 
 
         //已封装好，无需更改。可按照需求进行注释
@@ -64,7 +63,7 @@ public class GenerateCode {
                             .mapper("dao")   //Mapper 包名
                             .xml("dao.xml")  //Mapper XML 包名
                             .controller("controller") //Controller 包名
-                            .pathInfo(Collections.singletonMap(OutputFile.mapper.xml, System.getProperty("user.dir")+"/src/main/resources/mapper"));    //配置 mapper.xml 路径信息：项目的 resources 目录下
+                            .pathInfo(Collections.singletonMap(OutputFile.mapper.xml, System.getProperty("user.dir") + "/src/main/resources/mapper"));    //配置 mapper.xml 路径信息：项目的 resources 目录下
                 })
                 //4、策略配置
                 .strategyConfig(builder -> {
@@ -125,7 +124,7 @@ public class GenerateCode {
 
                 })
                 //5、模板
-                .templateEngine(new FreemarkerTemplateEngine())	//本人选择了Freemarker
+                .templateEngine(new FreemarkerTemplateEngine())    //本人选择了Freemarker
                 //6、执行
                 .execute();
     }

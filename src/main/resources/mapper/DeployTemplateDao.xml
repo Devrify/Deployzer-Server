@@ -4,18 +4,19 @@
 
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.devrify.deployzerserver.entity.vo.DeployTemplateVo">
-        <id column="deploy_template_id" property="deployTemplateId" />
-        <result column="created_by" property="createdBy" />
-        <result column="creation_date" property="creationDate" />
-        <result column="last_updated_by" property="lastUpdatedBy" />
-        <result column="last_updated_date" property="lastUpdatedDate" />
-        <result column="template_content" property="templateContent" />
-        <result column="template_name" property="templateName" />
+        <id column="deploy_template_id" property="deployTemplateId"/>
+        <result column="created_by" property="createdBy"/>
+        <result column="creation_date" property="creationDate"/>
+        <result column="last_updated_by" property="lastUpdatedBy"/>
+        <result column="last_updated_date" property="lastUpdatedDate"/>
+        <result column="template_content" property="templateContent"/>
+        <result column="template_name" property="templateName"/>
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        created_by,
+        created_by
+        ,
         creation_date,
         last_updated_by,
         last_updated_date,
