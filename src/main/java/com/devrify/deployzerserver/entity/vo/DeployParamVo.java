@@ -35,9 +35,6 @@ public class DeployParamVo extends BaseVo implements Serializable {
     @JsonProperty("param_key")
     private String paramKey;
 
-    @JsonProperty("param_value")
-    private String paramValue;
-
     @TableField("deploy_template_id")
     private Long deployTemplateId;
 }

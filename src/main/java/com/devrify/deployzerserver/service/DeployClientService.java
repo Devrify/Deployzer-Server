@@ -1,4 +1,4 @@
-package com.devrify.deployzerserver.service.impl;
+package com.devrify.deployzerserver.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -22,7 +22,7 @@ import java.util.List;
  * @since 2023-12-06 11:55:48
  */
 @Service
-public class DeployClientServiceImpl extends ServiceImpl<DeployClientDao, DeployClientVo> {
+public class DeployClientService extends ServiceImpl<DeployClientDao, DeployClientVo> {
 
     public DeployClientVo registration(RegistrationDto registrationDto) {
         // 检查是否有注册
@@ -46,7 +46,7 @@ public class DeployClientServiceImpl extends ServiceImpl<DeployClientDao, Deploy
         return this.updateClientStatusByUuid(databaseResult.getClientUuid(), DeployzerClientStatusEnum.WAITING);
     }
 
-    public DeployClientVo updateClientStatusByClientId(
+    public void updateClientStatusByClientId(
             Long clientId, DeployzerClientStatusEnum statusEnum) throws DeployzerException {
         DeployClientVo deployClientVo = this.getById(clientId);
         if (ObjectUtils.isEmpty(deployClientVo)) {
@@ -54,7 +54,6 @@ public class DeployClientServiceImpl extends ServiceImpl<DeployClientDao, Deploy
         }
         deployClientVo.setClientStatus(statusEnum.name());
         this.updateById(deployClientVo);
-        return deployClientVo;
     }
 
     public DeployClientVo updateClientStatusByUuid(

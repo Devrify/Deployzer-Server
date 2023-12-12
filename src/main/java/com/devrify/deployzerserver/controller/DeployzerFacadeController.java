@@ -5,20 +5,15 @@ import com.devrify.deployzerserver.common.exception.DeployzerException;
 import com.devrify.deployzerserver.entity.dto.*;
 import com.devrify.deployzerserver.entity.vo.DeployClientVo;
 import com.devrify.deployzerserver.entity.vo.DeployExecutionVo;
-import com.devrify.deployzerserver.entity.vo.DeployParamVo;
-import com.devrify.deployzerserver.entity.vo.DeployTemplateVo;
-import com.devrify.deployzerserver.service.impl.DeployClientServiceImpl;
-import com.devrify.deployzerserver.service.impl.DeployCommandServiceImpl;
-import com.devrify.deployzerserver.service.impl.DeployExecutionServiceImpl;
-import com.devrify.deployzerserver.service.impl.DeployTokenServiceImpl;
+import com.devrify.deployzerserver.service.DeployClientService;
+import com.devrify.deployzerserver.service.DeployCommandService;
+import com.devrify.deployzerserver.service.DeployExecutionService;
+import com.devrify.deployzerserver.service.DeployTokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * <p>
@@ -34,13 +29,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DeployzerFacadeController {
 
-    private final DeployTokenServiceImpl deployTokenService;
+    private final DeployTokenService deployTokenService;
 
-    private final DeployClientServiceImpl deployClientService;
+    private final DeployClientService deployClientService;
 
-    private final DeployExecutionServiceImpl deployExecutionService;
+    private final DeployExecutionService deployExecutionService;
 
-    private final DeployCommandServiceImpl deployCommandService;
+    private final DeployCommandService deployCommandService;
 
     @PostMapping("/registration")
     public ResultDto<DeployClientVo> registration(
@@ -121,7 +116,7 @@ public class DeployzerFacadeController {
             return ResultDto.fail("dto 或者命令模板为空");
         }
         try {
-            this.deployCommandService.saveOrUpdateTemplateAndParam(
+            this.deployCommandService.saveTemplateAndParam(
                     createTemplateParamDto.getDeployTemplateVo(),
                     createTemplateParamDto.getDeployParamVos()
             );
@@ -131,29 +126,18 @@ public class DeployzerFacadeController {
         return ResultDto.success();
     }
 
-    @PostMapping("/update-param")
-    public ResultDto<String> updateParam(@RequestBody List<DeployParamVo> deployParamVos) {
-        log.info(deployParamVos.toString());
-        // 检查属性是否为空
-        if (CollectionUtils.isEmpty(deployParamVos)) {
-            return ResultDto.fail("param vos 为空");
+    @PostMapping("update-template-param")
+    public ResultDto<String> updateTemplateAndParam(@RequestBody CreateTemplateParamDto createTemplateParamDto) {
+        log.info(createTemplateParamDto.toString());
+        // 检查属性
+        if (ObjectUtils.anyNull(createTemplateParamDto, createTemplateParamDto.getDeployTemplateVo())) {
+            return ResultDto.fail("dto 或者命令模板为空");
         }
         try {
-            this.deployCommandService.updateParam(deployParamVos);
-        } catch (DeployzerException e) {
-            return ResultDto.fail(e.getMessage());
-        }
-        return ResultDto.success();
-    }
-
-    @PostMapping("/update-template")
-    public ResultDto<String> updateTemplate(@RequestBody DeployTemplateVo deployTemplateVo) {
-        log.info(deployTemplateVo.toString());
-        if (ObjectUtils.isEmpty(deployTemplateVo)) {
-            return ResultDto.fail("template vo 为空");
-        }
-        try {
-            this.deployCommandService.updateTemplate(deployTemplateVo);
+            this.deployCommandService.updateTemplateAndParam(
+                    createTemplateParamDto.getDeployTemplateVo(),
+                    createTemplateParamDto.getDeployParamVos()
+            );
         } catch (DeployzerException e) {
             return ResultDto.fail(e.getMessage());
         }

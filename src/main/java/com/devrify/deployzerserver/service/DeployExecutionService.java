@@ -1,4 +1,4 @@
-package com.devrify.deployzerserver.service.impl;
+package com.devrify.deployzerserver.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.devrify.deployzerserver.dao.DeployExecutionDao;
@@ -14,6 +14,6 @@ import org.springframework.stereotype.Service;
  * @since 2023-12-06 11:55:48
  */
 @Service
-public class DeployExecutionServiceImpl extends ServiceImpl<DeployExecutionDao, DeployExecutionVo> {
+public class DeployExecutionService extends ServiceImpl<DeployExecutionDao, DeployExecutionVo> {
 
 }

@@ -26,12 +26,7 @@ public class GenerateCode {
 
         //数据库表的设置
         List<String> listTable = List.of(
-                "deploy_client_t",
-                "deploy_execution_t",
-                "deploy_log_t",
-                "deploy_param_t",
-                "deploy_template_t",
-                "deploy_token_t");  //设置需要自动代码生成的表名
+                "deploy_param_set_t");  //设置需要自动代码生成的表名
         List<String> listTableSuffix = List.of("_t");    //设置 过滤 表的后缀
         List<String> listTablePrefix = Arrays.asList("t_", "c_"); //设置 过滤 表的后缀
 

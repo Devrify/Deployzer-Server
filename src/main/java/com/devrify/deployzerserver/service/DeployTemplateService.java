@@ -1,4 +1,4 @@
-package com.devrify.deployzerserver.service.impl;
+package com.devrify.deployzerserver.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
  * @since 2023-12-06 11:55:48
  */
 @Service
-public class DeployTemplateServiceImpl extends ServiceImpl<DeployTemplateDao, DeployTemplateVo> {
+public class DeployTemplateService extends ServiceImpl<DeployTemplateDao, DeployTemplateVo> {
 
     private static final Pattern PARAM_PATTERN = Pattern.compile("\\$\\{([^}]*)}");
 

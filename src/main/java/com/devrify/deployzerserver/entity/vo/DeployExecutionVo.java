@@ -40,6 +40,9 @@ public class DeployExecutionVo extends BaseVo implements Serializable {
     @TableField("deploy_client_id")
     private Long deployClientId;
 
+    @TableField("command")
+    private String command;
+
     @TableField("execution_output")
     private String executionOutput;
 
