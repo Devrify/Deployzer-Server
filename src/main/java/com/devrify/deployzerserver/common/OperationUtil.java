@@ -62,4 +62,17 @@ public class OperationUtil {
         }
         return null;
     }
+
+    public static <T> boolean checkIfListsDiff(List<T> left, List<T> right) {
+        if (CollectionUtils.isEmpty(left) || CollectionUtils.isEmpty(right)) {
+            return true;
+        }
+        HashSet<T> set = new HashSet<>(right);
+        for (T t : left) {
+            if (!set.contains(t)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

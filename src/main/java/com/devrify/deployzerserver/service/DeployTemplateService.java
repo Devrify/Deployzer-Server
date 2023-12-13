@@ -34,15 +34,7 @@ public class DeployTemplateService extends ServiceImpl<DeployTemplateDao, Deploy
         return result;
     }
 
-    public boolean checkIfTemplateExist(String name) {
-        return ObjectUtils.isNotEmpty(this.getDeployTemplateByName(name));
-    }
-
-    public boolean checkIfTemplateExist(Long templateId) {
-        return ObjectUtils.isNotEmpty(this.getById(templateId));
-    }
-
-    private DeployTemplateVo getDeployTemplateByName(String name) {
+    public DeployTemplateVo getDeployTemplateByName(String name) {
         LambdaQueryWrapper<DeployTemplateVo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DeployTemplateVo::getTemplateName, name);
         return this.getOne(queryWrapper);

@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -23,8 +24,9 @@ import java.io.Serializable;
 @EqualsAndHashCode(callSuper = false)
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @TableName("deploy_param_t")
-public class DeployParamVo extends BaseVo implements Serializable {
+public class DeployParamKeyVo extends BaseVo implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;

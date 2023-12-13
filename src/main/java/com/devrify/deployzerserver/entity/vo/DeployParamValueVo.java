@@ -4,13 +4,11 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.devrify.deployzerserver.entity.vo.BaseVo;
 
 import java.io.Serial;
 import java.io.Serializable;
 
 import lombok.*;
-import lombok.experimental.Accessors;
 
 /**
  * <p>
@@ -24,16 +22,13 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 @TableName("deploy_param_set_t")
-public class DeployParamSetVo extends BaseVo implements Serializable {
+public class DeployParamValueVo extends BaseVo implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
 
     @TableId(value = "deploy_param_set_id", type = IdType.AUTO)
-    private Long deployParamSetId;
-
-    @TableField("deploy_param_id")
-    private Long deployParamId;
+    private Long deployParamValueId;
 
     @TableField("param_set_name")
     private String paramSetName;
@@ -41,6 +36,12 @@ public class DeployParamSetVo extends BaseVo implements Serializable {
     @TableField("deploy_template_id")
     private Long deployTemplateId;
 
+    @TableField("deploy_param_key")
+    private String deployParamKey;
+
     @TableField("deploy_param_value")
     private String deployParamValue;
+
+    @TableField("status")
+    private String status;
 }

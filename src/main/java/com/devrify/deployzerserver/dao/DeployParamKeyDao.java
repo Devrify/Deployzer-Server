@@ -1,7 +1,7 @@
 package com.devrify.deployzerserver.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.devrify.deployzerserver.entity.vo.DeployParamVo;
+import com.devrify.deployzerserver.entity.vo.DeployParamKeyVo;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -13,6 +13,6 @@ import org.apache.ibatis.annotations.Mapper;
  * @since 2023-12-06 11:55:48
  */
 @Mapper
-public interface DeployParamDao extends BaseMapper<DeployParamVo> {
+public interface DeployParamKeyDao extends BaseMapper<DeployParamKeyVo> {
 
 }

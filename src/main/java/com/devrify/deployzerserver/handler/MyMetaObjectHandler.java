@@ -16,6 +16,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         metaObject.setValue("createdBy", "System");
         this.strictInsertFill(metaObject, "lastUpdatedDate", LocalDateTime::now, LocalDateTime.class);
         metaObject.setValue("lastUpdatedBy", "System");
+        metaObject.setValue("status", "VALID");
     }
 
     @Override

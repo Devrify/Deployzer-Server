@@ -1,6 +1,6 @@
 package com.devrify.deployzerserver.entity.dto;
 
-import com.devrify.deployzerserver.entity.vo.DeployParamVo;
+import com.devrify.deployzerserver.entity.vo.DeployParamKeyVo;
 import com.devrify.deployzerserver.entity.vo.DeployTemplateVo;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,5 +20,5 @@ public class CreateTemplateParamDto {
 
     @JsonProperty("deploy_params")
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private List<DeployParamVo> deployParamVos;
+    private List<DeployParamKeyVo> deployParamKeyVos;
 }
