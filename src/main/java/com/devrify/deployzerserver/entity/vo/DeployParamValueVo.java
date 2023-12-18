@@ -1,9 +1,6 @@
 package com.devrify.deployzerserver.entity.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -30,13 +27,13 @@ public class DeployParamValueVo extends BaseVo implements Serializable {
     @TableId(value = "deploy_param_set_id", type = IdType.AUTO)
     private Long deployParamValueId;
 
-    @TableField("param_set_name")
+    @TableField(value = "param_set_name", updateStrategy = FieldStrategy.NEVER)
     private String paramSetName;
 
-    @TableField("deploy_template_id")
+    @TableField(value = "deploy_template_id", updateStrategy = FieldStrategy.NEVER)
     private Long deployTemplateId;
 
-    @TableField("deploy_param_key")
+    @TableField(value = "deploy_param_key", updateStrategy = FieldStrategy.NEVER)
     private String deployParamKey;
 
     @TableField("deploy_param_value")
@@ -44,4 +41,7 @@ public class DeployParamValueVo extends BaseVo implements Serializable {
 
     @TableField("status")
     private String status;
+
+    @TableField(value = "param_set_uuid", updateStrategy = FieldStrategy.NEVER)
+    private String paramSetUuid;
 }

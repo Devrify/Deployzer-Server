@@ -98,7 +98,12 @@ public class DeployCommandService {
             throw new DeployzerException("template id 下的 param set name 重复");
         }
         // 设置状态为启用, 保存
-        deployParamValueVos.forEach(o -> o.setStatus(DeployzerParamSetStatusEnum.VALID.name()));
+        for (DeployParamValueVo deployParamValueVo : deployParamValueVos) {
+            String paramSetString = deployParamValueVo.getParamSetName() + deployParamValueVo.getDeployTemplateId();
+            String paramSetUuid = UUID.nameUUIDFromBytes(paramSetString.getBytes()).toString();
+            deployParamValueVo.setParamSetUuid(paramSetUuid);
+            deployParamValueVo.setStatus(DeployzerParamSetStatusEnum.VALID.name());
+        }
         this.deployParamValueService.saveBatch(deployParamValueVos);
     }
 
@@ -117,4 +122,5 @@ public class DeployCommandService {
         deployParamValueVos.forEach(o -> o.setStatus(DeployzerParamSetStatusEnum.VALID.name()));
         this.deployParamValueService.updateBatchById(deployParamValueVos);
     }
+
 }
