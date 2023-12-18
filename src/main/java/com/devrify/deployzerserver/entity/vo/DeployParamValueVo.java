@@ -1,11 +1,12 @@
 package com.devrify.deployzerserver.entity.vo;
 
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serial;
 import java.io.Serializable;
-
-import lombok.*;
 
 /**
  * <p>

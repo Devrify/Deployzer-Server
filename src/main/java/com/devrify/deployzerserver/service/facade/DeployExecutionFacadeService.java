@@ -1,16 +1,13 @@
 package com.devrify.deployzerserver.service.facade;
 
 import com.devrify.deployzerserver.common.enums.DeployzerExecutionStatusEnum;
-import com.devrify.deployzerserver.common.enums.DeployzerStatusEnum;
 import com.devrify.deployzerserver.entity.vo.DeployExecutionVo;
 import com.devrify.deployzerserver.service.DeployExecutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
