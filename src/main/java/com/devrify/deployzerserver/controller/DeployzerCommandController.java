@@ -1,16 +1,10 @@
 package com.devrify.deployzerserver.controller;
 
-import com.devrify.deployzerserver.common.enums.DeployzerClientStatusEnum;
 import com.devrify.deployzerserver.common.exception.DeployzerException;
 import com.devrify.deployzerserver.entity.dto.*;
-import com.devrify.deployzerserver.entity.vo.DeployClientVo;
-import com.devrify.deployzerserver.entity.vo.DeployExecutionVo;
 import com.devrify.deployzerserver.entity.vo.DeployParamValueVo;
 import com.devrify.deployzerserver.entity.vo.DeployTemplateVo;
-import com.devrify.deployzerserver.service.DeployClientService;
-import com.devrify.deployzerserver.service.DeployCommandService;
-import com.devrify.deployzerserver.service.DeployExecutionService;
-import com.devrify.deployzerserver.service.DeployTokenService;
+import com.devrify.deployzerserver.service.facade.DeployCommandFacadeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -29,89 +23,12 @@ import java.util.List;
  * @since 2023-12-06 11:55:48
  */
 @RestController
-@RequestMapping("/deployzer")
+@RequestMapping("/deployzer/command")
 @Slf4j
 @RequiredArgsConstructor
-public class DeployzerFacadeController {
+public class DeployzerCommandController {
 
-    private final DeployTokenService deployTokenService;
-
-    private final DeployClientService deployClientService;
-
-    private final DeployExecutionService deployExecutionService;
-
-    private final DeployCommandService deployCommandService;
-
-    @PostMapping("/registration")
-    public ResultDto<DeployClientVo> registration(
-            @RequestHeader("Authorization") String token, @RequestBody RegistrationDto registrationDto) {
-        log.info(registrationDto.toString());
-        // 检查 token
-        try {
-            this.checkIfTokenValid(token);
-        } catch (DeployzerException e) {
-            return ResultDto.fail(e.getMessage(), new DeployClientVo());
-        }
-        // 检查属性
-        if (StringUtils.isAnyBlank(registrationDto.getUuid(), registrationDto.getIp())) {
-            return ResultDto.fail("uuid, ip 为空", new DeployClientVo());
-        }
-        // 注册并返回
-        DeployClientVo databaseResult = this.deployClientService.registration(registrationDto);
-        return ResultDto.success(databaseResult);
-    }
-
-    @PostMapping("/get-command")
-    public ResultDto<GetCommandResponseDto> getCommand(
-            @RequestHeader("Authorization") String token,
-            @RequestBody RegistrationDto registrationDto) {
-        log.info(registrationDto.toString());
-        // 检查 token
-        try {
-            this.checkIfTokenValid(token);
-        } catch (DeployzerException e) {
-            return ResultDto.fail(e.getMessage(), new GetCommandResponseDto());
-        }
-        // 检查 uuid 是否为空
-        if (StringUtils.isBlank(registrationDto.getUuid())) {
-            return ResultDto.fail("uuid 为空", new GetCommandResponseDto());
-        }
-        // todo: 获取命令
-
-        return ResultDto.success(new GetCommandResponseDto(1L, "java --version"));
-    }
-
-    @PostMapping("/report-command-result")
-    public ResultDto<String> reportResult(
-            @RequestHeader("Authorization") String token,
-            @RequestBody ReportCommandResultDto reportCommandResultDto) {
-        log.info(reportCommandResultDto.toString());
-        // 检查 token
-        try {
-            this.checkIfTokenValid(token);
-        } catch (DeployzerException e) {
-            return ResultDto.fail(e.getMessage());
-        }
-        // 检查 execution id 是否有效
-        if (ObjectUtils.isEmpty(reportCommandResultDto.getDeployExecutionId())) {
-            return ResultDto.fail("execution id 为空");
-        }
-        DeployExecutionVo databaseResult =
-                this.deployExecutionService.getById(reportCommandResultDto.getDeployExecutionId());
-        if (ObjectUtils.isEmpty(databaseResult)) {
-            return ResultDto.fail("execution id 找不到记录:" + reportCommandResultDto.getDeployExecutionId());
-        }
-        // todo:保存 log
-
-        // 更新状态
-        try {
-            this.deployClientService.updateClientStatusByClientId(
-                    databaseResult.getDeployClientId(), DeployzerClientStatusEnum.WAITING);
-        } catch (DeployzerException e) {
-            return ResultDto.fail(e.getMessage());
-        }
-        return ResultDto.success();
-    }
+    private final DeployCommandFacadeService deployCommandFacadeService;
 
     @PostMapping("create-template")
     public ResultDto<String> createTemplateAndParam(@RequestBody DeployTemplateVo deployTemplateVo) {
@@ -119,7 +36,7 @@ public class DeployzerFacadeController {
         return this.easyReturn(() -> {
             this.checkIfDeployTemplateValid(deployTemplateVo);
             deployTemplateVo.setDeployTemplateId(null);
-            this.deployCommandService.saveTemplate(deployTemplateVo);
+            this.deployCommandFacadeService.saveTemplate(deployTemplateVo);
         });
     }
 
@@ -131,7 +48,7 @@ public class DeployzerFacadeController {
             if (ObjectUtils.isEmpty(deployTemplateVo.getDeployTemplateId())) {
                 throw new DeployzerException("template id 为空");
             }
-            this.deployCommandService.updateTemplate(deployTemplateVo);
+            this.deployCommandFacadeService.updateTemplate(deployTemplateVo);
         });
     }
 
@@ -152,7 +69,7 @@ public class DeployzerFacadeController {
                 }
                 deployTemplateVo.setDeployParamValueId(null);
             }
-            this.deployCommandService.saveParamSet(deployParamValueVos);
+            this.deployCommandFacadeService.saveParamSet(deployParamValueVos);
         });
     }
 
@@ -175,19 +92,8 @@ public class DeployzerFacadeController {
                     throw new DeployzerException("deploy param value id 为空");
                 }
             }
-            this.deployCommandService.updateParamSet(deployParamValueVos);
+            this.deployCommandFacadeService.updateParamSet(deployParamValueVos);
         });
-    }
-
-    private void checkIfTokenValid(String token) throws DeployzerException {
-        if (StringUtils.isBlank(token)) {
-            throw new DeployzerException("token 为空");
-        }
-        try {
-            this.deployTokenService.checkIfTokenValid(token);
-        } catch (DeployzerException e) {
-            throw new DeployzerException(e.getMessage());
-        }
     }
 
     private void checkIfDeployTemplateValid(DeployTemplateVo deployTemplateVo) throws DeployzerException {

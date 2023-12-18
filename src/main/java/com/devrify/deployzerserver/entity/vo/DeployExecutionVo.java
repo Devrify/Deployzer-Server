@@ -1,9 +1,6 @@
 package com.devrify.deployzerserver.entity.vo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -48,4 +45,7 @@ public class DeployExecutionVo extends BaseVo implements Serializable {
 
     @TableField("execution_status")
     private String executionStatus;
+
+    @TableField(value = "param_set_uuid", updateStrategy = FieldStrategy.NEVER)
+    private String paramSetUuid;
 }

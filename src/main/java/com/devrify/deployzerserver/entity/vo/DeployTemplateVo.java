@@ -36,4 +36,7 @@ public class DeployTemplateVo extends BaseVo implements Serializable {
 
     @TableField("template_name")
     private String templateName;
+
+    @TableField("status")
+    private String status;
 }

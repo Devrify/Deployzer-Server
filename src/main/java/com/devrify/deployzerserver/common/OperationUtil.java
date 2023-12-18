@@ -49,18 +49,18 @@ public class OperationUtil {
         return null;
     }
 
-    public static <T> T hasDuplicateElement(List<T> list) {
+    public static <T> boolean hasDuplicateElement(List<T> list) {
         if (CollectionUtils.isEmpty(list)) {
-            return null;
+            return false;
         }
         for (int i = 0; i < list.size() - 1; i++) {
             for (int j = i + 1; j < list.size(); j++) {
                 if (list.get(i).equals(list.get(j))) {
-                    return list.get(i);
+                    return true;
                 }
             }
         }
-        return null;
+        return false;
     }
 
     public static <T> boolean checkIfListsDiff(List<T> left, List<T> right) {

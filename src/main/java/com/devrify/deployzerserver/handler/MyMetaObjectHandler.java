@@ -1,6 +1,7 @@
 package com.devrify.deployzerserver.handler;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
+import com.devrify.deployzerserver.common.enums.DeployzerStatusEnum;
 import org.apache.ibatis.reflection.MetaObject;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,7 @@ public class MyMetaObjectHandler implements MetaObjectHandler {
         metaObject.setValue("createdBy", "System");
         this.strictInsertFill(metaObject, "lastUpdatedDate", LocalDateTime::now, LocalDateTime.class);
         metaObject.setValue("lastUpdatedBy", "System");
-        metaObject.setValue("status", "VALID");
+        metaObject.setValue("status", DeployzerStatusEnum.WAITING);
     }
 
     @Override

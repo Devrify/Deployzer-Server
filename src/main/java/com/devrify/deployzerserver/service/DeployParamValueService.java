@@ -31,4 +31,10 @@ public class DeployParamValueService extends ServiceImpl<DeployParamValueDao, De
         queryWrapper.eq(DeployParamValueVo::getParamSetName, deployParamValueVo.getParamSetName());
         return this.list(queryWrapper);
     }
+
+    public List<DeployParamValueVo> getByParamSetUuid(String paramSetUuid) {
+        LambdaQueryWrapper<DeployParamValueVo> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(DeployParamValueVo::getParamSetUuid, paramSetUuid);
+        return this.list(queryWrapper);
+    }
 }

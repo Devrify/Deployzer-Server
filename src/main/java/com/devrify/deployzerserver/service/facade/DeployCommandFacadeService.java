@@ -1,11 +1,14 @@
-package com.devrify.deployzerserver.service;
+package com.devrify.deployzerserver.service.facade;
 
 import com.devrify.deployzerserver.common.OperationUtil;
-import com.devrify.deployzerserver.common.enums.DeployzerParamSetStatusEnum;
+import com.devrify.deployzerserver.common.enums.DeployzerStatusEnum;
 import com.devrify.deployzerserver.common.exception.DeployzerException;
 import com.devrify.deployzerserver.entity.vo.DeployParamKeyVo;
 import com.devrify.deployzerserver.entity.vo.DeployParamValueVo;
 import com.devrify.deployzerserver.entity.vo.DeployTemplateVo;
+import com.devrify.deployzerserver.service.DeployParamKeyService;
+import com.devrify.deployzerserver.service.DeployParamValueService;
+import com.devrify.deployzerserver.service.DeployTemplateService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -18,7 +21,7 @@ import java.util.*;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class DeployCommandService {
+public class DeployCommandFacadeService {
 
     private final DeployTemplateService deployTemplateService;
 
@@ -58,6 +61,10 @@ public class DeployCommandService {
         if (ObjectUtils.isEmpty(databaseResult)) {
             throw new DeployzerException("找不到 template :" + deployTemplateVo);
         }
+        // 检查 template 是否为运行中
+        if (DeployzerStatusEnum.RUNNING.name().equals(databaseResult.getStatus())) {
+            throw new DeployzerException("模板的状态为运行中");
+        }
         // 更新 template
         this.deployTemplateService.updateById(deployTemplateVo);
         // 获取 template 之前的 key, 全部删除, 添加新的 param key
@@ -85,7 +92,7 @@ public class DeployCommandService {
         // 除非新的 param key 和原来的 param key 一致， 否则 param set 的状态都置为待确认
         List<String> oldParamKeys = deployParamKeyVos.stream().map(DeployParamKeyVo::getParamKey).toList();
         if (OperationUtil.checkIfListsDiff(oldParamKeys, paramKeys)) {
-            databaseParamValueVos.forEach(o -> o.setStatus(DeployzerParamSetStatusEnum.WAIT_FOR_CHECK.name()));
+            databaseParamValueVos.forEach(o -> o.setStatus(DeployzerStatusEnum.NOT_CONFIRM.name()));
             this.deployParamValueService.updateBatchById(databaseParamValueVos);
         }
     }
@@ -102,7 +109,7 @@ public class DeployCommandService {
             String paramSetString = deployParamValueVo.getParamSetName() + deployParamValueVo.getDeployTemplateId();
             String paramSetUuid = UUID.nameUUIDFromBytes(paramSetString.getBytes()).toString();
             deployParamValueVo.setParamSetUuid(paramSetUuid);
-            deployParamValueVo.setStatus(DeployzerParamSetStatusEnum.VALID.name());
+            deployParamValueVo.setStatus(DeployzerStatusEnum.WAITING.name());
         }
         this.deployParamValueService.saveBatch(deployParamValueVos);
     }
@@ -118,9 +125,31 @@ public class DeployCommandService {
         if (ids.size() != databaseResult.size()) {
             throw new DeployzerException("部分 value id 不存在");
         }
+        if (DeployzerStatusEnum.RUNNING.name().equals(databaseResult.get(0).getStatus())) {
+            throw new DeployzerException("param set 的状态为运行中");
+        }
         // 设置状态为启用, 保存
-        deployParamValueVos.forEach(o -> o.setStatus(DeployzerParamSetStatusEnum.VALID.name()));
+        deployParamValueVos.forEach(o -> o.setStatus(DeployzerStatusEnum.WAITING.name()));
         this.deployParamValueService.updateBatchById(deployParamValueVos);
     }
 
+    public String getCommandFromTemplateAndParamSet(Long templateId, String paramSetUuid) throws DeployzerException {
+        DeployTemplateVo template = this.deployTemplateService.getById(templateId);
+        if (ObjectUtils.isEmpty(template)) {
+            throw new DeployzerException("找不到模板：" + templateId);
+        }
+        List<DeployParamValueVo> paramSet = this.deployParamValueService.getByParamSetUuid(paramSetUuid);
+        if (ObjectUtils.isEmpty(paramSet)) {
+            throw new DeployzerException("找不到参数 set");
+        }
+        // 将 place holder 转换为 实际的 value
+        String result = template.getTemplateContent();
+        for (DeployParamValueVo deployParamValueVo : paramSet) {
+            result = this.deployTemplateService.setParamValue(
+                    deployParamValueVo.getDeployParamKey(),
+                    deployParamValueVo.getDeployParamValue(),
+                    result);
+        }
+        return result;
+    }
 }
