@@ -64,7 +64,7 @@ public class DeployClientService extends ServiceImpl<DeployClientDao, DeployClie
         return deployClientVo;
     }
 
-    private DeployClientVo getDeployClientByUuid(String uuid) {
+    public DeployClientVo getDeployClientByUuid(String uuid) {
         LambdaQueryWrapper<DeployClientVo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DeployClientVo::getClientUuid, uuid);
         return this.getOne(queryWrapper);

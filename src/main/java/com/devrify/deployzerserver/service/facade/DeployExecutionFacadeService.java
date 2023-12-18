@@ -1,7 +1,11 @@
 package com.devrify.deployzerserver.service.facade;
 
+import com.devrify.deployzerserver.common.enums.DeployzerClientStatusEnum;
 import com.devrify.deployzerserver.common.enums.DeployzerExecutionStatusEnum;
+import com.devrify.deployzerserver.common.exception.DeployzerException;
+import com.devrify.deployzerserver.entity.vo.DeployClientVo;
 import com.devrify.deployzerserver.entity.vo.DeployExecutionVo;
+import com.devrify.deployzerserver.service.DeployClientService;
 import com.devrify.deployzerserver.service.DeployExecutionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +22,8 @@ public class DeployExecutionFacadeService {
 
     private final DeployExecutionService deployExecutionService;
 
+    private final DeployClientService deployClientService;
+
     private ConcurrentHashMap<Long, ConcurrentLinkedQueue<DeployExecutionVo>> map;
 
     public void createExecution(DeployExecutionVo deployExecutionVo) {
@@ -31,9 +37,14 @@ public class DeployExecutionFacadeService {
         this.map.put(deployExecutionVo.getDeployClientId(), commandQueue);
     }
 
-    public String getCommand(Long clientId) {
+    public String getCommand(String clientUuid) throws DeployzerException {
+        // 获取 client id
+        DeployClientVo deployClientVo = this.deployClientService.getDeployClientByUuid(clientUuid);
+        if (ObjectUtils.isEmpty(deployClientVo)) {
+            throw new DeployzerException("找不到 client：" + clientUuid);
+        }
         // 获取执行 vo
-        ConcurrentLinkedQueue<DeployExecutionVo> deployExecutionVos = this.map.get(clientId);
+        ConcurrentLinkedQueue<DeployExecutionVo> deployExecutionVos = this.map.get(deployClientVo.getDeployClientId());
         if (ObjectUtils.isEmpty(deployExecutionVos)) {
             return null;
         }
@@ -46,6 +57,8 @@ public class DeployExecutionFacadeService {
                 this.deployExecutionService.getById(deployExecutionVo.getDeployExecutionId());
         databaseResult.setExecutionStatus(DeployzerExecutionStatusEnum.RUNNING.name());
         this.deployExecutionService.updateById(databaseResult);
+        // 根据 client uuid 更新
+        this.deployClientService.updateClientStatusByUuid(clientUuid, DeployzerClientStatusEnum.RUNNING);
         return databaseResult.getCommand();
     }
 }
