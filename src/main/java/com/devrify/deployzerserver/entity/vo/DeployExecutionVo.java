@@ -1,6 +1,9 @@
 package com.devrify.deployzerserver.entity.vo;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.PropertyNamingStrategy;
+import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,13 +31,13 @@ public class DeployExecutionVo extends BaseVo implements Serializable {
     @TableId(value = "deploy_execution_id", type = IdType.AUTO)
     private Long deployExecutionId;
 
-    @TableField("deploy_template_id")
+    @TableField(value = "deploy_template_id", updateStrategy = FieldStrategy.NEVER)
     private Long deployTemplateId;
 
-    @TableField("deploy_param_id")
-    private Long deployParamId;
+    @TableField(value = "param_set_uuid", updateStrategy = FieldStrategy.NEVER)
+    private String paramSetUuid;
 
-    @TableField("deploy_client_id")
+    @TableField(value = "deploy_client_id", updateStrategy = FieldStrategy.NEVER)
     private Long deployClientId;
 
     @TableField("command")
@@ -43,9 +46,12 @@ public class DeployExecutionVo extends BaseVo implements Serializable {
     @TableField("execution_output")
     private String executionOutput;
 
+    @TableField("execution_error")
+    private String executionError;
+
     @TableField("execution_status")
     private String executionStatus;
 
-    @TableField(value = "param_set_uuid", updateStrategy = FieldStrategy.NEVER)
-    private String paramSetUuid;
+    @TableField("duration")
+    private Float duration;
 }

@@ -40,8 +40,8 @@ public class DeployParamValueVo extends BaseVo implements Serializable {
     @TableField("deploy_param_value")
     private String deployParamValue;
 
-    @TableField("status")
-    private String status;
+    @TableField("param_set_status")
+    private String paramSetStatus;
 
     @TableField(value = "param_set_uuid", updateStrategy = FieldStrategy.NEVER)
     private String paramSetUuid;

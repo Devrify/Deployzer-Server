@@ -1,4 +1,4 @@
-package com.devrify.deployzerserver.common;
+package com.devrify.deployzerserver.common.util;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -74,5 +74,41 @@ public class OperationUtil {
             }
         }
         return false;
+    }
+
+    public static <T> boolean anyEqual(List<T> list, T target) {
+        if (CollectionUtils.isEmpty(list)) {
+            return false;
+        }
+        for (T t : list) {
+            if (t.equals(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static <T> boolean anyNotEqual(List<T> list, T target) {
+        if (CollectionUtils.isEmpty(list)) {
+            return true;
+        }
+        for (T t : list) {
+            if (!t.equals(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static <T> boolean allEqual(List<T> list, T target) {
+        if (CollectionUtils.isEmpty(list)) {
+            return true;
+        }
+        for (T t : list) {
+            if (!t.equals(target)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -29,7 +29,7 @@ import java.util.List;
 @RequestMapping("/deployzer/command")
 @Slf4j
 @RequiredArgsConstructor
-public class DeployzerCommandController {
+public class DeployzerCommandController extends BaseController {
 
     private final DeployCommandFacadeService deployCommandFacadeService;
 
@@ -108,19 +108,5 @@ public class DeployzerCommandController {
         if (StringUtils.isAnyBlank(deployTemplateVo.getTemplateName(), deployTemplateVo.getTemplateContent())) {
             throw new DeployzerException("模板的内容，名称为空");
         }
-    }
-
-    private ResultDto<String> easyReturn(CheckedFunction function) {
-        try {
-            function.accept();
-        } catch (DeployzerException e) {
-            return ResultDto.fail(e.getMessage());
-        }
-        return ResultDto.success();
-    }
-
-    @FunctionalInterface
-    public interface CheckedFunction {
-        void accept() throws DeployzerException;
     }
 }

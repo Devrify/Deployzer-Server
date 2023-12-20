@@ -1,9 +1,7 @@
 package com.devrify.deployzerserver.common.enums;
 
-public enum DeployzerStatusEnum {
+public enum DeployzerTemplateStatusEnum {
     WAITING,
-
-    NOT_CONFIRM,
 
     RUNNING,
 

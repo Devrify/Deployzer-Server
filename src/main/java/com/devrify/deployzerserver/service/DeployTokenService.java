@@ -23,21 +23,16 @@ import java.util.List;
 @Service
 public class DeployTokenService extends ServiceImpl<DeployTokenDao, DeployTokenVo> {
 
-    public boolean checkIfTokenValid(String token) throws DeployzerException {
-        if (StringUtils.isBlank(token)) {
-            throw new DeployzerException("token 为空");
-        }
-
+    public void checkIfTokenValid(String token) throws DeployzerException {
         List<DeployTokenVo> allValidToken = this.getAllValidToken();
         if (CollectionUtils.isEmpty(allValidToken)) {
-            return false;
+            throw new DeployzerException("没有 VALID 的 TOKEN");
         }
         for (DeployTokenVo deployTokenVo : allValidToken) {
             if (token.equals(deployTokenVo.getToken())) {
-                return true;
+                return;
             }
         }
-        return false;
     }
 
     private List<DeployTokenVo> getAllValidToken() {

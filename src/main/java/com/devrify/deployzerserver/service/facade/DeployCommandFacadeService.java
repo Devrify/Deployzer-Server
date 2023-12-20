@@ -1,7 +1,8 @@
 package com.devrify.deployzerserver.service.facade;
 
-import com.devrify.deployzerserver.common.OperationUtil;
-import com.devrify.deployzerserver.common.enums.DeployzerStatusEnum;
+import com.devrify.deployzerserver.common.util.OperationUtil;
+import com.devrify.deployzerserver.common.enums.DeployzerParamSetStatusEnum;
+import com.devrify.deployzerserver.common.enums.DeployzerTemplateStatusEnum;
 import com.devrify.deployzerserver.common.exception.DeployzerException;
 import com.devrify.deployzerserver.entity.vo.DeployParamKeyVo;
 import com.devrify.deployzerserver.entity.vo.DeployParamValueVo;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -63,7 +65,7 @@ public class DeployCommandFacadeService {
             throw new DeployzerException("找不到 template :" + deployTemplateVo);
         }
         // 检查 template 是否为运行中
-        if (DeployzerStatusEnum.RUNNING.name().equals(databaseResult.getStatus())) {
+        if (DeployzerTemplateStatusEnum.RUNNING.name().equals(databaseResult.getStatus())) {
             throw new DeployzerException("模板的状态为运行中");
         }
         // 更新 template
@@ -93,29 +95,34 @@ public class DeployCommandFacadeService {
         // 除非新的 param key 和原来的 param key 一致， 否则 param set 的状态都置为待确认
         List<String> oldParamKeys = deployParamKeyVos.stream().map(DeployParamKeyVo::getParamKey).toList();
         if (OperationUtil.checkIfListsDiff(oldParamKeys, paramKeys)) {
-            databaseParamValueVos.forEach(o -> o.setStatus(DeployzerStatusEnum.NOT_CONFIRM.name()));
+            databaseParamValueVos.forEach(o -> o.setParamSetStatus(DeployzerParamSetStatusEnum.INVALID.name()));
             this.deployParamValueService.updateBatchById(databaseParamValueVos);
         }
     }
 
     public void saveParamSet(List<DeployParamValueVo> deployParamValueVos) throws DeployzerException {
-        // 检查 param set name 和 template id 是否已存在
+        // 检查 param set name
+        DeployParamValueVo firstParamKeyVo = deployParamValueVos.get(0);
         List<DeployParamValueVo> databaseResult =
-                this.deployParamValueService.getByTemplateIdParamSetName(deployParamValueVos.get(0));
+                this.deployParamValueService.getByTemplateIdParamSetName(firstParamKeyVo);
         if (CollectionUtils.isNotEmpty(databaseResult)) {
-            throw new DeployzerException("template id 下的 param set name 重复");
+            throw new DeployzerException("template id 下的 param set name 重复:" + firstParamKeyVo);
         }
+        // 检查模板和 param set 是否一致
+        this.checkIfTemplateMatchParamSet(deployParamValueVos);
         // 设置状态为启用, 保存
         for (DeployParamValueVo deployParamValueVo : deployParamValueVos) {
             String paramSetString = deployParamValueVo.getParamSetName() + deployParamValueVo.getDeployTemplateId();
             String paramSetUuid = UUID.nameUUIDFromBytes(paramSetString.getBytes()).toString();
             deployParamValueVo.setParamSetUuid(paramSetUuid);
-            deployParamValueVo.setStatus(DeployzerStatusEnum.WAITING.name());
+            deployParamValueVo.setParamSetStatus(DeployzerParamSetStatusEnum.WAITING.name());
         }
         this.deployParamValueService.saveBatch(deployParamValueVos);
     }
 
     public void updateParamSet(List<DeployParamValueVo> deployParamValueVos) throws DeployzerException {
+        // 检查模板和 param set 是否一致
+        this.checkIfTemplateMatchParamSet(deployParamValueVos);
         // 检查 param value 是否存在
         List<Long> ids = deployParamValueVos.stream().map(DeployParamValueVo::getDeployParamValueId).toList();
         List<DeployParamValueVo> databaseResult =
@@ -126,15 +133,16 @@ public class DeployCommandFacadeService {
         if (ids.size() != databaseResult.size()) {
             throw new DeployzerException("部分 value id 不存在");
         }
-        if (DeployzerStatusEnum.RUNNING.name().equals(databaseResult.get(0).getStatus())) {
-            throw new DeployzerException("param set 的状态为运行中");
+        // 检查 param set 状态是否可用
+        List<String> statusList = databaseResult.stream().map(DeployParamValueVo::getParamSetStatus).toList();
+        if (OperationUtil.anyNotEqual(statusList, DeployzerParamSetStatusEnum.WAITING.name())) {
+            throw new DeployzerException("参数 set 的状态不可用");
         }
-        // 设置状态为启用, 保存
-        deployParamValueVos.forEach(o -> o.setStatus(DeployzerStatusEnum.WAITING.name()));
         this.deployParamValueService.updateBatchById(deployParamValueVos);
     }
 
     public String getCommandFromTemplateAndParamSet(Long templateId, String paramSetUuid) throws DeployzerException {
+        // 检查参数
         DeployTemplateVo template = this.deployTemplateService.getById(templateId);
         if (ObjectUtils.isEmpty(template)) {
             throw new DeployzerException("找不到模板：" + templateId);
@@ -143,6 +151,13 @@ public class DeployCommandFacadeService {
         if (ObjectUtils.isEmpty(paramSet)) {
             throw new DeployzerException("找不到参数 set");
         }
+        // 检查 param set 状态是否可用
+        List<String> statusList = paramSet.stream().map(DeployParamValueVo::getParamSetStatus).toList();
+        if (OperationUtil.anyEqual(statusList, DeployzerParamSetStatusEnum.INVALID.name())) {
+            throw new DeployzerException("参数 set 的状态不可用");
+        }
+        // 更新状态为运行中
+        this.updateTemplateAndParamSetStatus(templateId, paramSetUuid, DeployzerTemplateStatusEnum.RUNNING);
         // 将 place holder 转换为 实际的 value
         String result = template.getTemplateContent();
         for (DeployParamValueVo deployParamValueVo : paramSet) {
@@ -152,5 +167,57 @@ public class DeployCommandFacadeService {
                     result);
         }
         return result;
+    }
+
+    public String getCommandFromTemplate(Long templateId) throws DeployzerException {
+        // 检查参数
+        DeployTemplateVo template = this.deployTemplateService.getById(templateId);
+        if (ObjectUtils.isEmpty(template)) {
+            throw new DeployzerException("找不到模板：" + templateId);
+        }
+        // 更新状态为运行中
+        template.setStatus(DeployzerTemplateStatusEnum.RUNNING.name());
+        this.deployTemplateService.updateById(template);
+        return template.getTemplateContent();
+    }
+
+    public void updateTemplateAndParamSetStatus(
+            Long templateId,
+            String paramSetUuid,
+            DeployzerTemplateStatusEnum deployzerTemplateStatusEnum) throws DeployzerException {
+        // 检查参数
+        if (ObjectUtils.anyNull(templateId, deployzerTemplateStatusEnum)) {
+            throw new DeployzerException("template id 或 template 状态为空");
+        }
+        if (StringUtils.isBlank(paramSetUuid)) {
+            throw new DeployzerException("param set uuid 为空");
+        }
+        // 检查数据库
+        DeployTemplateVo templateVo = this.deployTemplateService.getById(templateId);
+        List<DeployParamValueVo> paramValueVos = this.deployParamValueService.getByParamSetUuid(paramSetUuid);
+        if (ObjectUtils.isEmpty(templateVo) || CollectionUtils.isEmpty(paramValueVos)) {
+            throw new DeployzerException("template 或者 param set uuid 找不到记录");
+        }
+        // 更新状态
+        templateVo.setStatus(deployzerTemplateStatusEnum.name());
+        paramValueVos.forEach(o -> o.setParamSetStatus(deployzerTemplateStatusEnum.name()));
+        this.deployTemplateService.updateById(templateVo);
+        this.deployParamValueService.updateBatchById(paramValueVos);
+    }
+
+    private void checkIfTemplateMatchParamSet(List<DeployParamValueVo> deployParamValueVos) throws DeployzerException {
+        // 检查 template id
+        DeployParamValueVo firstParamKeyVo = deployParamValueVos.get(0);
+        DeployTemplateVo template = this.deployTemplateService.getById(firstParamKeyVo.getDeployTemplateId());
+        if (ObjectUtils.isEmpty(template)) {
+            throw new DeployzerException("template 找不到" + template);
+        }
+        // 检查 param key 是否一致
+        List<String> paramKeys = deployParamValueVos.stream().map(DeployParamValueVo::getDeployParamKey).toList();
+        List<String> templateParamKeys =
+                this.deployTemplateService.getParamKey(template.getTemplateContent());
+        if (OperationUtil.checkIfListsDiff(paramKeys, templateParamKeys)) {
+            throw new DeployzerException("参数和模板对不上");
+        }
     }
 }

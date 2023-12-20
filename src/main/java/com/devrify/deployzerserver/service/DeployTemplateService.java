@@ -2,7 +2,7 @@ package com.devrify.deployzerserver.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.devrify.deployzerserver.common.OperationUtil;
+import com.devrify.deployzerserver.common.util.OperationUtil;
 import com.devrify.deployzerserver.common.exception.DeployzerException;
 import com.devrify.deployzerserver.dao.DeployTemplateDao;
 import com.devrify.deployzerserver.entity.vo.DeployTemplateVo;
