@@ -2,6 +2,8 @@ package com.devrify.deployzerserver.service.facade;
 
 import com.devrify.deployzerserver.common.enums.DeployzerClientStatusEnum;
 import com.devrify.deployzerserver.common.enums.DeployzerExecutionStatusEnum;
+import com.devrify.deployzerserver.common.enums.DeployzerParamSetStatusEnum;
+import com.devrify.deployzerserver.common.enums.DeployzerTemplateStatusEnum;
 import com.devrify.deployzerserver.common.exception.DeployzerException;
 import com.devrify.deployzerserver.entity.dto.ReportCommandResultDto;
 import com.devrify.deployzerserver.entity.vo.DeployClientVo;
@@ -14,8 +16,12 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -34,6 +40,9 @@ public class DeployExecutionFacadeService {
     private final ConcurrentHashMap<Long, Integer> templateRunningCountMap =
             new ConcurrentHashMap<>();
 
+    private final ConcurrentHashMap<String, Integer> paramSetRunningCountMap =
+            new ConcurrentHashMap<>();
+
     public void createExecution(DeployExecutionVo deployExecutionVo) throws DeployzerException {
         // 检查 client 是否可用
         DeployClientVo clientVo = this.deployClientService.getById(deployExecutionVo.getDeployClientId());
@@ -43,8 +52,7 @@ public class DeployExecutionFacadeService {
         if (DeployzerClientStatusEnum.DOWN.name().equals(clientVo.getClientStatus())) {
             throw new DeployzerException("client 不可用");
         }
-        // 设置命令，状态并保存
-        deployExecutionVo.setExecutionStatus(DeployzerExecutionStatusEnum.WAITING.name());
+        // 获取命令和 param set
         String command;
         if (StringUtils.isBlank(deployExecutionVo.getParamSetUuid())) {
             command = this.deployCommandFacadeService.getCommandFromTemplate(deployExecutionVo.getDeployTemplateId());
@@ -54,17 +62,26 @@ public class DeployExecutionFacadeService {
                     deployExecutionVo.getParamSetUuid()
             );
         }
+        // 设置完整的命令和 execution 的状态
         deployExecutionVo.setCommand(command);
+        deployExecutionVo.setExecutionStatus(DeployzerExecutionStatusEnum.WAITING.name());
         deployExecutionService.save(deployExecutionVo);
         // 放命令到 map 中
         ConcurrentLinkedQueue<DeployExecutionVo> commandQueue =
                 clientCommandQueueMap.getOrDefault(deployExecutionVo.getDeployClientId(), new ConcurrentLinkedQueue<>());
         commandQueue.offer(deployExecutionVo);
         this.clientCommandQueueMap.put(deployExecutionVo.getDeployClientId(), commandQueue);
-        // 放状态到 map 中
+        // 状态 map count ++
         templateRunningCountMap.put(
                 deployExecutionVo.getDeployTemplateId(),
-                templateRunningCountMap.getOrDefault(deployExecutionVo.getDeployTemplateId(), 0) + 1);
+                templateRunningCountMap.getOrDefault(deployExecutionVo.getDeployTemplateId(), 0) + 1
+        );
+        if (StringUtils.isNotBlank(deployExecutionVo.getParamSetUuid())) {
+            paramSetRunningCountMap.put(
+                    deployExecutionVo.getParamSetUuid(),
+                    paramSetRunningCountMap.getOrDefault(deployExecutionVo.getParamSetUuid(), 0) + 1
+            );
+        }
     }
 
     public DeployExecutionVo getCommand(String clientUuid) throws DeployzerException {
@@ -93,7 +110,9 @@ public class DeployExecutionFacadeService {
         return databaseResult;
     }
 
-    public DeployExecutionVo saveExecutionResult(ReportCommandResultDto reportCommandResultDto) throws DeployzerException {
+    public DeployExecutionVo saveExecutionResult(
+            ReportCommandResultDto reportCommandResultDto)
+            throws DeployzerException {
         // 获取数据库记录
         DeployExecutionVo databaseResult =
                 this.deployExecutionService.getById(reportCommandResultDto.getDeployExecutionId());
@@ -110,17 +129,45 @@ public class DeployExecutionFacadeService {
             databaseResult.setExecutionStatus(DeployzerExecutionStatusEnum.FAIL.name());
         }
         this.deployExecutionService.updateById(databaseResult);
-        // todo: 思考状态更新的链路
-        // running status -1. 如果为 0 则 template 状态应该改为 waiting
+        // 更新状态
         Long templateId = databaseResult.getDeployTemplateId();
-        Integer count = templateRunningCountMap.get(templateId);
-        if (ObjectUtils.isEmpty(count)) {
-            return databaseResult;
-        }
-        count--;
-        templateRunningCountMap.put(templateId, count > 0 ? count : 0);
-        if (count == 0) {
+        this.updateStatus(
+                templateRunningCountMap,
+                templateId,
+                () -> this.deployCommandFacadeService.updateTemplateStatus(
+                        templateId, DeployzerTemplateStatusEnum.WAITING)
+        );
+        String paramSetUuid = databaseResult.getParamSetUuid();
+        if (StringUtils.isNotEmpty(paramSetUuid)) {
+            this.updateStatus(
+                    paramSetRunningCountMap,
+                    paramSetUuid,
+                    () -> this.deployCommandFacadeService.updateParamSetStatus(
+                            paramSetUuid, DeployzerParamSetStatusEnum.WAITING)
+            );
         }
         return databaseResult;
+    }
+
+    private <T> void updateStatus (
+            Map<T, Integer> map,
+            T key,
+            Function databaseUpdateFunction) throws DeployzerException {
+        Integer count = map.get(key);
+        if (ObjectUtils.isEmpty(count)) {
+            databaseUpdateFunction.run();
+            return;
+        }
+        if (count -1 <= 0) {
+            map.put(key, 0);
+            databaseUpdateFunction.run();
+        } else {
+            map.put(key, count - 1);
+        }
+    }
+
+    @FunctionalInterface
+    private interface Function {
+        void run() throws DeployzerException;
     }
 }

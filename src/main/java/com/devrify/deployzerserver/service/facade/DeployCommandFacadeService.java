@@ -141,6 +141,17 @@ public class DeployCommandFacadeService {
         this.deployParamValueService.updateBatchById(deployParamValueVos);
     }
 
+    public String getCommandFromTemplate(Long templateId) throws DeployzerException {
+        // 检查参数
+        DeployTemplateVo template = this.deployTemplateService.getById(templateId);
+        if (ObjectUtils.isEmpty(template)) {
+            throw new DeployzerException("找不到模板：" + templateId);
+        }
+        // 更新状态为运行中
+        this.updateTemplateStatus(templateId, DeployzerTemplateStatusEnum.RUNNING);
+        return template.getTemplateContent();
+    }
+
     public String getCommandFromTemplateAndParamSet(Long templateId, String paramSetUuid) throws DeployzerException {
         // 检查参数
         DeployTemplateVo template = this.deployTemplateService.getById(templateId);
@@ -157,7 +168,8 @@ public class DeployCommandFacadeService {
             throw new DeployzerException("参数 set 的状态不可用");
         }
         // 更新状态为运行中
-        this.updateTemplateAndParamSetStatus(templateId, paramSetUuid, DeployzerTemplateStatusEnum.RUNNING);
+        this.updateTemplateStatus(templateId, DeployzerTemplateStatusEnum.RUNNING);
+        this.updateParamSetStatus(paramSetUuid, DeployzerParamSetStatusEnum.RUNNING);
         // 将 place holder 转换为 实际的 value
         String result = template.getTemplateContent();
         for (DeployParamValueVo deployParamValueVo : paramSet) {
@@ -169,39 +181,40 @@ public class DeployCommandFacadeService {
         return result;
     }
 
-    public String getCommandFromTemplate(Long templateId) throws DeployzerException {
-        // 检查参数
-        DeployTemplateVo template = this.deployTemplateService.getById(templateId);
-        if (ObjectUtils.isEmpty(template)) {
-            throw new DeployzerException("找不到模板：" + templateId);
-        }
-        // 更新状态为运行中
-        template.setStatus(DeployzerTemplateStatusEnum.RUNNING.name());
-        this.deployTemplateService.updateById(template);
-        return template.getTemplateContent();
-    }
-
-    public void updateTemplateAndParamSetStatus(
+    public void updateTemplateStatus(
             Long templateId,
-            String paramSetUuid,
             DeployzerTemplateStatusEnum deployzerTemplateStatusEnum) throws DeployzerException {
         // 检查参数
         if (ObjectUtils.anyNull(templateId, deployzerTemplateStatusEnum)) {
             throw new DeployzerException("template id 或 template 状态为空");
         }
+        // 检查数据库
+        DeployTemplateVo templateVo = this.deployTemplateService.getById(templateId);
+        if (ObjectUtils.isEmpty(templateVo)) {
+            throw new DeployzerException("template id 找不到记录");
+        }
+        // 更新状态
+        templateVo.setStatus(deployzerTemplateStatusEnum.name());
+        this.deployTemplateService.updateById(templateVo);
+    }
+
+    public void updateParamSetStatus(
+            String paramSetUuid,
+            DeployzerParamSetStatusEnum deployzerParamSetStatusEnum) throws DeployzerException {
+        // 检查参数
+        if (ObjectUtils.isEmpty(deployzerParamSetStatusEnum)) {
+            throw new DeployzerException("param set 状态为空");
+        }
         if (StringUtils.isBlank(paramSetUuid)) {
             throw new DeployzerException("param set uuid 为空");
         }
         // 检查数据库
-        DeployTemplateVo templateVo = this.deployTemplateService.getById(templateId);
         List<DeployParamValueVo> paramValueVos = this.deployParamValueService.getByParamSetUuid(paramSetUuid);
-        if (ObjectUtils.isEmpty(templateVo) || CollectionUtils.isEmpty(paramValueVos)) {
-            throw new DeployzerException("template 或者 param set uuid 找不到记录");
+        if (CollectionUtils.isEmpty(paramValueVos)) {
+            throw new DeployzerException("param set uuid 找不到记录");
         }
         // 更新状态
-        templateVo.setStatus(deployzerTemplateStatusEnum.name());
-        paramValueVos.forEach(o -> o.setParamSetStatus(deployzerTemplateStatusEnum.name()));
-        this.deployTemplateService.updateById(templateVo);
+        paramValueVos.forEach(o -> o.setParamSetStatus(deployzerParamSetStatusEnum.name()));
         this.deployParamValueService.updateBatchById(paramValueVos);
     }
 
