@@ -59,6 +59,9 @@ public class DeployClientService extends ServiceImpl<DeployClientDao, DeployClie
     public DeployClientVo updateClientStatusByUuid(
             String uuid, DeployzerClientStatusEnum statusEnum) {
         DeployClientVo deployClientVo = this.getDeployClientByUuid(uuid);
+        if (ObjectUtils.isEmpty(deployClientVo)) {
+            return null;
+        }
         deployClientVo.setClientStatus(statusEnum.name());
         this.updateById(deployClientVo);
         return deployClientVo;

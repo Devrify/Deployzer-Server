@@ -19,9 +19,6 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Service
 @Slf4j
@@ -94,6 +91,8 @@ public class DeployExecutionFacadeService {
         ConcurrentLinkedQueue<DeployExecutionVo> deployExecutionVos =
                 this.clientCommandQueueMap.get(deployClientVo.getDeployClientId());
         if (ObjectUtils.isEmpty(deployExecutionVos)) {
+            // 更新 client 状态为 waiting
+            this.deployClientService.updateClientStatusByUuid(clientUuid, DeployzerClientStatusEnum.WAITING);
             return null;
         }
         // 获取数据库对应记录， execution 和 client 状态置为运行， 并返回结果
@@ -110,7 +109,7 @@ public class DeployExecutionFacadeService {
         return databaseResult;
     }
 
-    public DeployExecutionVo saveExecutionResult(
+    public void saveExecutionResult(
             ReportCommandResultDto reportCommandResultDto)
             throws DeployzerException {
         // 获取数据库记录
@@ -149,7 +148,6 @@ public class DeployExecutionFacadeService {
                             paramSetUuid, DeployzerParamSetStatusEnum.WAITING)
             );
         }
-        return databaseResult;
     }
 
     private <T> void updateStatus (
