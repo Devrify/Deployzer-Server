@@ -70,7 +70,7 @@ public class DeployClientService extends ServiceImpl<DeployClientDao, DeployClie
         return this.getOne(queryWrapper);
     }
 
-    private List<DeployClientVo> getDeployClientByStatus(DeployzerClientStatusEnum statusEnum) {
+    public List<DeployClientVo> getDeployClientByStatus(DeployzerClientStatusEnum statusEnum) {
         LambdaQueryWrapper<DeployClientVo> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(DeployClientVo::getClientStatus, statusEnum);
         return this.list(queryWrapper);
