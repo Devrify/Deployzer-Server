@@ -129,6 +129,9 @@ public class DeployExecutionFacadeService {
             databaseResult.setExecutionStatus(DeployzerExecutionStatusEnum.FAIL.name());
         }
         this.deployExecutionService.updateById(databaseResult);
+        // 更新 client 状态
+        this.deployClientService.updateClientStatusByClientId(
+                databaseResult.getDeployClientId(), DeployzerClientStatusEnum.WAITING);
         // 更新状态
         Long templateId = databaseResult.getDeployTemplateId();
         this.updateStatus(

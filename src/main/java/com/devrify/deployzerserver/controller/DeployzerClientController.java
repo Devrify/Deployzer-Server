@@ -9,7 +9,6 @@ import com.devrify.deployzerserver.entity.dto.ResultDto;
 import com.devrify.deployzerserver.entity.vo.DeployClientVo;
 import com.devrify.deployzerserver.entity.vo.DeployExecutionVo;
 import com.devrify.deployzerserver.service.DeployClientService;
-import com.devrify.deployzerserver.service.DeployExecutionService;
 import com.devrify.deployzerserver.service.DeployTokenService;
 import com.devrify.deployzerserver.service.facade.DeployExecutionFacadeService;
 import lombok.RequiredArgsConstructor;
@@ -93,13 +92,7 @@ public class DeployzerClientController extends BaseController {
                 throw new DeployzerException("stdout 和 stderr 均为空");
             }
             // 保存 log
-            DeployExecutionVo deployExecutionVo =
-                    this.deployExecutionFacadeService.saveExecutionResult(reportCommandResultDto);
-            // client 状态改为 waiting
-            this.deployClientService.updateClientStatusByClientId(
-                    deployExecutionVo.getDeployClientId(),
-                    DeployzerClientStatusEnum.WAITING
-            );
+            this.deployExecutionFacadeService.saveExecutionResult(reportCommandResultDto);
         });
     }
 
