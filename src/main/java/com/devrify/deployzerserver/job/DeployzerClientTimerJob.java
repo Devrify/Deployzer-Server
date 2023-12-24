@@ -36,8 +36,6 @@ public class DeployzerClientTimerJob {
         for (DeployClientVo waitingClient : waitingClients) {
             LocalDateTime now = LocalDateTime.now();
             long diffInSecond = ChronoUnit.SECONDS.between(now, waitingClient.getLastUpdatedDate());
-            log.info(now.toString());
-            log.info(waitingClient.getLastUpdatedDate().toString());
             if (Math.abs(diffInSecond) > 120) {
                 downClients.add(waitingClient);
             }
