@@ -1,7 +1,7 @@
 #
 # Build stage
 #
-FROM maven:3.9.6-amazoncorretto-17-al2023 AS build
+FROM maven:3.9.6-amazoncorretto-17-debian AS build
 ENV HOME=/usr/app
 RUN mkdir -p $HOME
 WORKDIR $HOME
