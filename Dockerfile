@@ -13,4 +13,4 @@ RUN mvn -f /usr/src/app/pom.xml clean package
 FROM eclipse-temurin:17-jre-alpine
 COPY --from=build /usr/src/app/target/*.jar /usr/app/app.jar
 EXPOSE 8080
-ENTRYPOINT java -jar /app/app*.jar
+ENTRYPOINT ["java", "-cp", "/usr/app/app.jar", "com.devrify.deployzerserver.DeployzerServerApplication"]
