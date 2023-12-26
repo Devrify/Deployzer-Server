@@ -1,3 +1,4 @@
+git pull;
 image_name="nopepsi/app:deployzer-server";
 container_name="deployzer-server";
 docker rm -f $container_name;
