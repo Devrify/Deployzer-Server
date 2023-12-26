@@ -13,6 +13,6 @@ RUN --mount=type=cache,target=/root/.m2 ./mvnw -f $HOME/pom.xml clean package
 #
 FROM eclipse-temurin:17-jre-alpine
 ARG JAR_FILE=/usr/app/target/*.jar
-COPY --from=build $JAR_FILE /app/deployzer-server.jar
+COPY --from=build $JAR_FILE /app/app.jar
 EXPOSE 8080
-ENTRYPOINT java -jar /app/deployzer-server.jar
+ENTRYPOINT java -jar /app/app*.jar
