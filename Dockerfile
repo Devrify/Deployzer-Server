@@ -2,11 +2,10 @@
 # Build stage
 #
 FROM maven:3.9.6-amazoncorretto-17-debian AS build
-ENV HOME=/usr/app
-RUN mkdir -p $HOME
-WORKDIR $HOME
-ADD . $HOME
-RUN --mount=type=cache,target=/root/.m2 ./mvnw -f $HOME/pom.xml clean package
+COPY src /usr/src/app/src
+COPY pom.xml /usr/src/app
+
+RUN mvn -f /usr/src/app/pom.xml clean package
 
 #
 # Package stage
